@@ -5,10 +5,11 @@ import Header  from "./components/header";
 
 import { lazy, Suspense } from "react";
 
+
 const Home = lazy(() => import("./pages/Home"));
 const Search = lazy(() => import("./pages/Search"));
 const Cart = lazy(() => import("./pages/Cart"));
-
+const Shipping = lazy(() => import("./pages/shipping"));
 //admin Routes import start
 const Dashboard = lazy(() => import("./pages/admin/dashboard"));
 const Products = lazy(() => import("./pages/admin/products"));
@@ -39,8 +40,12 @@ const App = () => {
           <Route path="/search" element={<Search />} />
           <Route path="/cart" element={<Cart />} />
 
+          {/* login user routes */}
+          <Route path="/shipping" element={<Shipping />} />
+
+
           
-          //admin routes
+         { /*admin routes*/}
           <Route
             // element={
             //   <ProtectedRoute
