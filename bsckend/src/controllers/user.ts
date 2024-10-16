@@ -14,6 +14,19 @@ export const newUser = TryCatch(async (
     const { name, email, photo, gender, _id, dob } = req.body;
     
     // Check for missing fields
+   
+
+    // Create the user
+    let user = await User.findById(_id);  
+
+    if(user){
+      return res.status(200).json({
+        sucess:true,
+        message:`welcome, ${user.name}`
+      })
+    }
+
+
     const missingFields: string[] = [];
     if (!name) missingFields.push("name");
     if (!email) missingFields.push("email");
@@ -26,8 +39,7 @@ export const newUser = TryCatch(async (
       return next(new ErrorHandler(`Missing fields: ${missingFields.join(", ")}`, 405));
     }
 
-    // Create the user
-    const user = await User.create({
+     user = await User.create({
       name,
       email,
       photo,
@@ -63,3 +75,45 @@ export const newUser = TryCatch(async (
     return next(error);
   }
 })
+
+export const getAllUsers = TryCatch(async(req,res,next)=>{
+  const users = await User.find({})
+  return res.status(201).json({
+    success:true,
+    users,
+    message:`all users list sent sucessfully`
+  })
+})
+
+export const getUser =TryCatch(async(req,res,next)=>{
+  const id = req.params.id;
+  const user = await User.findById(id)
+  if(!user){
+    return next(new ErrorHandler(`No user found with id: ${id}`, 404))
+  }
+  return res.status(200).json({
+    success:true,
+    user,
+    message:`user details sent sucessfully`
+  })
+})
+
+
+export const deleteUser =TryCatch(async(req,res,next)=>{
+  const id = req.params.id;
+   
+    const user = await User.findById(id)
+    if(!user){
+      return next(new ErrorHandler(`No user found with id: ${id}`, 404))
+    }
+
+    await User.deleteOne({});
+    return res.status(200).json({
+      success:true,
+      user,
+      message:`user deleted sucessfully`
+    })
+    
+
+
+}) 
