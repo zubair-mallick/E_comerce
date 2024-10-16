@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",                             
+    "rootDir": "src",                                  /* Specify the root folder within your source files. */
+    "moduleResolution": "NodeNext", 
+    "outDir": "dist",
+    "strict": true                    /* Specify how TypeScript looks up a file from a given 
+                          /* Skip type checking all .d.ts files. */
+  }
+}
