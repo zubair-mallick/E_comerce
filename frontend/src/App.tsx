@@ -5,7 +5,7 @@ import Header  from "./components/header";
 
 import { lazy, Suspense } from "react";
 
-
+const Login = lazy(()=>import("./pages/login.tsx"))
 const Home = lazy(() => import("./pages/Home"));
 const Search = lazy(() => import("./pages/Search"));
 const Cart = lazy(() => import("./pages/Cart"));
@@ -39,6 +39,9 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<Search />} />
           <Route path="/cart" element={<Cart />} />
+         
+         {/* not logged in route */}
+         <Route path="/login" element={<Login />} />
 
           {/* login user routes */}
           <Route path="/shipping" element={<Shipping />} />
