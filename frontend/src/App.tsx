@@ -5,11 +5,17 @@ import Header  from "./components/header";
 
 import { lazy, Suspense } from "react";
 
+
+
 const Login = lazy(()=>import("./pages/login.tsx"))
 const Home = lazy(() => import("./pages/Home"));
 const Search = lazy(() => import("./pages/Search"));
 const Cart = lazy(() => import("./pages/Cart"));
 const Shipping = lazy(() => import("./pages/shipping"));
+const Orders = lazy(() => import("./pages/Orders"));
+const OrderDetails = lazy(() => import("./pages/orderDetails.tsx"));
+
+
 //admin Routes import start
 const Dashboard = lazy(() => import("./pages/admin/dashboard"));
 const Products = lazy(() => import("./pages/admin/products"));
@@ -44,7 +50,13 @@ const App = () => {
          <Route path="/login" element={<Login />} />
 
           {/* login user routes */}
-          <Route path="/shipping" element={<Shipping />} />
+         <Route>
+         <Route path="/shipping" element={<Shipping />} />
+         <Route path="/orders" element={<Orders />} />
+         <Route path="/order/:id" element={<OrderDetails />} />
+
+         </Route>
+
 
 
           

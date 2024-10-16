@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { FaSearch, FaShoppingBag, FaSignInAlt, FaSignOutAlt, FaUser } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 
-const user={_id:"",role:"admin"}
+const user={_id:"asd",role:"admin"}
 const header = () => {
     const [isOpen,setIsOpen] = useState<boolean>(false)
     const logoutHandler =()=>{
@@ -15,7 +15,7 @@ const header = () => {
 
   return (
    <nav  className='header' >
-         <Link to={"/"} onClick={()=>setIsOpen(false)} >Home</Link>
+         <Link to={"/"} onClick={()=>setIsOpen(false)} >HOME</Link>
          <Link to={"/seacrh"} onClick={()=>setIsOpen(false)} ><FaSearch/></Link>
          <Link to={"/cart"} onClick={()=>setIsOpen(false)}><FaShoppingBag/></Link>
 
