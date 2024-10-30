@@ -25,7 +25,7 @@ export const newCoupon= TryCatch(async(req,res,next)=>{
                 return next(new ErrorHandler("Please enter another code", 400));
             }
         }
-        throw error; // re-throw the error if it doesn't match the condition
+        throw error ; // re-throw the error if it doesn't match the condition
     }
 
 })
