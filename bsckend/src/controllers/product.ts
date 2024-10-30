@@ -1,12 +1,12 @@
-import { TryCatch } from "../middleware/error.js";
-import { Request, Response } from "express";
-import { NewProductRequestBody, SearchRequestQuery } from "../types/types.js";
-import { Product } from "../models/products.js";
-import ErrorHandler from "../utils/utitlity-class.js";
-import { cloudinary } from "../config/cloudinary.js"; // Import Cloudinary
 import { extractPublicId } from "cloudinary-build-url";
+import { Request } from "express";
 import { myCache } from "../app.js";
+import { cloudinary } from "../config/cloudinary.js"; // Import Cloudinary
+import { TryCatch } from "../middleware/error.js";
+import { Product } from "../models/products.js";
+import { NewProductRequestBody, SearchRequestQuery } from "../types/types.js";
 import { invalidateCache } from "../utils/features.js";
+import ErrorHandler from "../utils/utitlity-class.js";
 
 export const getlatestProducts = TryCatch(
   async (req: Request<{}, {}, NewProductRequestBody>, res, next) => {
