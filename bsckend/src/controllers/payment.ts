@@ -51,7 +51,7 @@ export const applyDiscount = TryCatch(async (req, res, next) => {
   return res.status(200).json({
     success: true,
     discount: discount.amount,
-    message: `Coupon(${coupon}) applied successfully`,
+    message: `Coupon ${coupon} applied successfully`,
   });
 });
 
@@ -74,7 +74,7 @@ export const deleteCoupon = TryCatch(async (req, res, next) => {
     return res.status(200).json({
       success: true,
       coupon: discount.code,
-      message: `Coupon deleted  successfully`,
+      message: `Coupon ${discount.code} deleted  successfully`,
     });
   });
 
