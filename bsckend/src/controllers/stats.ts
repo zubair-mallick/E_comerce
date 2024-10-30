@@ -51,7 +51,16 @@ export const getDashboardStats = TryCatch(async(req,res,next)=>{
             createdAt: {$gte: lastMonth.start, $lte: lastMonth.end}
         })        
 
-        const [thisMonthProducts,lastMonthProducts,thisMonthUsers,lastMonthUsers,thisMonthOrders,lastMonthOrders ] = await Promise.all([
+    const[  thisMonthProducts,
+            lastMonthProducts,
+            thisMonthUsers,
+            lastMonthUsers,
+            thisMonthOrders,
+            lastMonthOrders,
+            productCount,
+            userCount,
+            allOrders 
+        ] = await Promise.all([
             thisMonthProductsPromise,
             lastMonthProductsPromise,
 
@@ -60,18 +69,36 @@ export const getDashboardStats = TryCatch(async(req,res,next)=>{
             
             thisMonthOrdersPromise,
             lastMonthOrdersPromise,
+
+            Product.countDocuments(),
+            User.countDocuments(),
+            Order.find({}).select("total")
         ]);
 
-   
-        const productChangePercent = calculatePercentage(thisMonthProducts.length,lastMonthProducts.length)
-        const userChangePercent = calculatePercentage(thisMonthUsers.length,lastMonthUsers.length)
-        const orderChangePercent = calculatePercentage(thisMonthOrders.length,lastMonthOrders.length)
-        console.log('\x1b[32m%s\x1b[0m',{productChangePercent,userChangePercent,orderChangePercent}, "🥹");
+        const thisMonthRevenue = thisMonthOrders.reduce((total,order)=>total + (order.total ||  0),0 )
+        const lastMonthRevenue = lastMonthOrders.reduce((total,order)=>total + (order.total ||  0),0 )
+           
+        console.log({thisMonthRevenue,lastMonthRevenue})
+        
+        const changePercent={
+            revenue:calculatePercentage(thisMonthRevenue,lastMonthRevenue),
+            product:calculatePercentage(thisMonthProducts.length,lastMonthProducts.length),
+            user: calculatePercentage(thisMonthUsers.length,lastMonthUsers.length),
+            order: calculatePercentage(thisMonthOrders.length,lastMonthOrders.length),
+        }
+
+        const revenue = allOrders.reduce((total,order)=>total + (order.total || 0),0)
+
+        const count ={
+            product:productCount,
+            user:userCount,
+            orders: allOrders.length,
+            revenue 
+        }
 
         stats={
-            productChangePercent,
-            userChangePercent,
-            orderChangePercent,
+                changePercent,
+                count
             }
 
         
