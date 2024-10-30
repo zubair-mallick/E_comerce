@@ -54,3 +54,38 @@ export const applyDiscount = TryCatch(async (req, res, next) => {
     message: `Coupon(${coupon}) applied successfully`,
   });
 });
+
+
+export const deleteCoupon = TryCatch(async (req, res, next) => {
+
+
+    const { couponid:id } = req.params;
+
+    if (!id) {
+      return next(new ErrorHandler("Please provide coupon code", 400));
+    }
+    
+    const discount = await Coupon.findByIdAndDelete(id);
+    
+    if(!discount){
+        return next(new ErrorHandler("Coupon not found", 404));
+    }
+  
+    return res.status(200).json({
+      success: true,
+      coupon: discount.code,
+      message: `Coupon deleted  successfully`,
+    });
+  });
+
+export const allCoupons = TryCatch(async (req, res, next) => {
+
+    const coupons = await Coupon.find({});
+    return res.status(200).json({
+      success: true,
+      coupons,
+      message: "All coupons list sent successfully",
+    });
+
+});
+  

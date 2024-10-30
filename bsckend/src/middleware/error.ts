@@ -10,6 +10,8 @@ export const errorMiddleware =(err: ErrorHandler, req: Request, res: Response, n
     err.statusCode= err.statusCode || 500
 
     if (err instanceof mongoose.Error.CastError) {
+        
+        
         err.statusCode = 400; // Bad Request
         err.message = `Invalid ID format: ${err.value}`;
     }
