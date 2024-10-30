@@ -6,7 +6,7 @@ const Home = () => {
   return (
     <div className="home">
       <section></section>
-          <h1>Latest products
+          <h1>Latest products 
             <Link to="/seacrh" className="findmore" > More </Link>
           </h1>
       <main>

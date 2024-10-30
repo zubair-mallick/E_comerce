@@ -20,3 +20,49 @@ export interface NewUserRequestBody {
   export type ControllerType=(
     (req: Request, res: Response, next: NextFunction) => Promise<void | Response<any,Record<string,any>> >
   )
+
+  export type SearchRequestQuery = {
+    limit?:string | number;
+    search?:string;
+    price?:string | number;
+    category?: string;
+    sort? : string;
+    page?: number;  
+
+  }
+
+  export type InvalidateCacheProp ={
+    product?:boolean;
+    order?:boolean;
+    admin?:boolean;
+    userId?:string;
+    orderId?:string;
+    productId?:string | string[];
+  }
+
+  export interface OrderItem {
+    name:string;
+    photo:string;
+    productId: string;
+    quantity: number;
+    price: number;
+  }
+
+  export type shippingInfo={
+    address:string; 
+    city:string;
+    state:string;
+    country:string;
+    pincode:string;
+  }
+
+  export interface NewOrderRequestBody{
+    shippingInfo:shippingInfo;
+    user:string;
+    subtotal:number;
+    tax:number;
+    shippingCharges:number;
+    discount:number;
+    total:number;
+    orderItems:OrderItem[]
+  }
