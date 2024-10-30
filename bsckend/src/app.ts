@@ -9,6 +9,8 @@ import morgan from 'morgan'
 import userRoute from "./routes/user.js"
 import productRoute from "./routes/product.js"
 import orderRoute from "./routes/order.js"
+import paymentRoute from "./routes/payment.js"
+
 
 
 config({
@@ -32,9 +34,7 @@ app.get('/', (req, res) => {
 app.use("/api/v1/user",userRoute)
 app.use("/api/v1/product",productRoute)
 app.use("/api/v1/order",orderRoute)
-
-
-
+app.use("/api/v1/payment",paymentRoute)
 
 app.use(errorMiddleware)
 
