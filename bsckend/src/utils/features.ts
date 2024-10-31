@@ -63,7 +63,7 @@ export const reduceStock = async (orderItems: OrderItem[]) => {
 export const calculatePercentage =  (thisMonth:number ,lastMonth:number) => {
     
     if(lastMonth==0) {
-      return Number((thisMonth* 100).toFixed(2));
+      return Number(((thisMonth)*100).toFixed(0));
     }
 
     const percent = ((thisMonth - lastMonth)/ lastMonth)*100
