@@ -24,6 +24,7 @@ export const invalidateCache = async ({
       "latest-product",
       "category",
       "adminProducts",
+      
     ];
     if (typeof productId === "string")
       productKeys.push(`singleProduct-${productId}`);
@@ -40,6 +41,7 @@ export const invalidateCache = async ({
       "all-orders",
       `my-orders-${userId}`,
       `singleorder-${orderId}`,
+      
     ];
 
     myCache.del(orderKeys);
