@@ -11,41 +11,43 @@ export const connectdb = () => {
     .catch((err) => console.log(`db conection error :${err}`));
 };
 
-export const invalidateCache = async ({
-  product,
-  order,
-  admin,
-  userId,
-  orderId,
-  productId,
-}: InvalidateCacheProp) => {
-  if (product) {
-    const productKeys: string[] = [
-      "latest-product",
-      "category",
-      "adminProducts",
-    ];
-    if (typeof productId === "string")
-      productKeys.push(`singleProduct-${productId}`);
-    console.log("here");
-    if (Array.isArray(productId)) {
-      productId!.forEach((productId) => {
-        productKeys.push(`singleProduct-${productId}`);
-      });
-    }
-    myCache.del(productKeys);
-  }
-  if (order) {
-    const orderKeys: string[] = [
-      "all-orders",
-      `my-orders-${userId}`,
-      `singleorder-${orderId}`,
-    ];
+export const invalidateCache =  ({
+            product,
+            order,
+            admin,
+            userId,
+            orderId,
+            productId,
+          }: InvalidateCacheProp) => {
+            if (product) {
+                  const productKeys: string[] = [
+                    "latest-product",
+                    "category",
+                    "adminProducts",
+                  ];
+                  if (typeof productId === "string")
+                        productKeys.push(`singleProduct-${productId}`);
+                    
+                  if (Array.isArray(productId)) {
+                       productId!.forEach((productId) => {
+                            productKeys.push(`singleProduct-${productId}`);
+                          });
+                  }
+                  myCache.del(productKeys);
+            }
+            if (order) {
+              const orderKeys: string[] = [
+                "all-orders",
+                `my-orders-${userId}`,
+                `singleorder-${orderId}`,
+              ];
 
-    myCache.del(orderKeys);
-  }
-  if (admin) {
-  }
+              myCache.del(orderKeys);
+            }
+            if (admin) {
+              myCache.del(["admin-stats","admin-pie-charts","admin-bar-charts", "admin-line-charts"])
+            }
+            myCache.del(["admin-stats","admin-pie-charts","admin-bar-charts", "admin-line-charts"])
 };
 
 export const reduceStock = async (orderItems: OrderItem[]) => {
@@ -94,27 +96,34 @@ export const getInventories = async ({
 };
 
 export interface MyDocument extends Document {
-  createdAt:Date
+  createdAt:Date,
+  discount?:number,
+  total?:number
 }
 
 type FuncProps={
   length: number;
   docArr: MyDocument[];
   today: Date;
+  property?: "discount" | "total" ;
 }
 
-export const getChartData =({length,docArr,today}:FuncProps)=>{
+export const getChartData =({length,docArr,today,property}:FuncProps)=>{
           
-            const data = new Array(length).fill(0)
+                   const data = new Array(length).fill(0)
 
-            docArr.forEach((i) =>{
-                    const creationDate=i.createdAt
-                    const monthDiff = (today.getMonth() - creationDate.getMonth() +12) % 12;
+                   docArr.forEach((i) =>{
+                      const creationDate=i.createdAt
+                      const monthDiff = (today.getMonth() - creationDate.getMonth() +12) % 12;
 
-                    if(monthDiff<length){
-                        data[length-1-monthDiff] +=1;
-                       
+                      if(monthDiff<length){
+                        
+                          
+                        data[length - 1 - monthDiff] += property ? 
+                        Math.round(i[property] as number) : 1;
+
+                        
                     }
                 })
-                return data;
+          return data;
 }

@@ -12,6 +12,7 @@ export const getDashboardStats = TryCatch(async(req,res,next)=>{
     if(myCache.has(key)) stats = JSON.parse(myCache.get(key) as string);
     else
     {
+        
             const today = new Date();
             const sixMonthsAgo= new Date()
 
@@ -300,7 +301,7 @@ export const getBarStats = TryCatch(async(req,res,next)=>{
         const lastTwelveMonthUsersPromise = User.find({
             createdAt: {$gte: twelveMonthsAgo , $lte:today}
         }).select("createdAt")
-        
+
         const [products,users,orders] = await Promise.all([
             lastSixMonthproductsPromise,
             lastTwelveMonthUsersPromise,
@@ -333,6 +334,61 @@ export const getBarStats = TryCatch(async(req,res,next)=>{
 
 })
 
-export const getLineStats = TryCatch(async()=>{
+export const getLineStats = TryCatch(async(req,res,next)=>{
 
+    let charts;
+    const key = "admin-line-charts";
+
+    if(myCache.has(key)){
+        charts= JSON.parse(myCache.get(key) as string);
+    }
+    else{
+        const today = new Date();
+
+
+        
+        const twelveMonthsAgo= new Date()
+        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth()-12)
+
+      
+        const lastTwelveProductPromise = Product.find({
+            createdAt: {$gte: twelveMonthsAgo , $lte:today}
+        }).select("createdAt")
+
+        const lastTwelveMonthUsersPromise = User.find({
+            createdAt: {$gte: twelveMonthsAgo , $lte:today}
+        }).select("createdAt")
+
+        const lastTwelveMonthOrdersPromise = Order.find({
+            createdAt: {$gte: twelveMonthsAgo , $lte:today}
+        }).select(["createdAt","discount","total"])
+        
+        const [products,users,orders] = await Promise.all([
+            lastTwelveProductPromise,
+            lastTwelveMonthUsersPromise,
+            lastTwelveMonthOrdersPromise
+        ])
+
+        const productCounts = getChartData({length:12,today,docArr:products as any})
+        const usersCounts = getChartData({length:12,today,docArr:users as any})
+        const discount = getChartData({length:12,today,docArr:orders as any , property: 'discount'})
+        const revenue = getChartData({length:12,today,docArr:orders as any , property: 'total'})
+
+
+        charts={
+            users:usersCounts,
+            products:productCounts,
+            discount,
+            revenue
+        }
+        
+        myCache.set(key,JSON.stringify(charts))
+    
+
+    }
+    return res.status(200).json({
+        success: true,
+        charts,
+        message: "barChart's stats fetched successfully"
+    })
 })
