@@ -24,7 +24,6 @@ export const invalidateCache = async ({
       "latest-product",
       "category",
       "adminProducts",
-      
     ];
     if (typeof productId === "string")
       productKeys.push(`singleProduct-${productId}`);
@@ -41,7 +40,6 @@ export const invalidateCache = async ({
       "all-orders",
       `my-orders-${userId}`,
       `singleorder-${orderId}`,
-      
     ];
 
     myCache.del(orderKeys);
@@ -62,13 +60,35 @@ export const reduceStock = async (orderItems: OrderItem[]) => {
   }
 };
 
-export const calculatePercentage =  (thisMonth:number ,lastMonth:number) => {
-    
-    if(lastMonth==0) {
-      return Number(((thisMonth)*100).toFixed(0));
-    }
+export const calculatePercentage = (thisMonth: number, lastMonth: number) => {
+  if (lastMonth == 0) {
+    return Number((thisMonth * 100).toFixed(0));
+  }
 
-    const percent = ((thisMonth - lastMonth)/ lastMonth)*100
+  const percent = ((thisMonth - lastMonth) / lastMonth) * 100;
+
+  return Number(percent.toFixed(0));
+};
+
+export const getInventories = async ({
+  categories,productCount
+}: {
+      categories: string[];
+      productCount:number;
+    }) => {
+      const categoriesCountPromise = categories.map((category) =>
+        Product.countDocuments({ category })
+      );
+      const categoriesCount = await Promise.all(categoriesCountPromise);
+
+      const categoryCount: { [key: string]: number }[] = [];
+
+      categories.forEach((cat, i) => {
+        categoryCount.push({
+          [cat]: Math.round((categoriesCount[i] / productCount) * 100),
+        });
+      });
+
+      return categoryCount;
     
-    return Number(percent.toFixed(0));
-}
+};
