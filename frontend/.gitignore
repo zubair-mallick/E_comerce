@@ -3,11 +3,17 @@
 logs
 **/*.backup.*
 **/*.back.*
-
+.env
 node_modules
 bower_components
 
 *.sublime*
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production
+
 
 psd
 thumb

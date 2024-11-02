@@ -53,6 +53,8 @@ export const newUser = TryCatch(async (
       success: true,
       message: `User created successfully: Welcome, ${user.name}`,
     });
+
+    
   } catch (error: any) {
     // Handle specific error cases using ErrorHandler
 
