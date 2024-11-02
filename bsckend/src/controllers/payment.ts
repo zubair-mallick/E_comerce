@@ -1,6 +1,21 @@
+import { stripe } from "../app.js";
 import { TryCatch } from "../middleware/error.js";
 import { Coupon } from "../models/coupon.js";
 import ErrorHandler from "../utils/utitlity-class.js";
+
+export const  createPaymentIntent = TryCatch(async(req,res,next)=>{
+  const {amount} = req.body;
+  if (!amount) {
+    return next(new ErrorHandler("Please provide amount", 400));
+  }
+  const paymentIntent = await stripe.paymentIntents.create({amount:Number(amount)*100, currency:"inr"})
+
+  res.status(201).json({
+    success: true,
+    clientSecret: paymentIntent.client_secret,
+    message: "Payment intent created successfully",
+  });
+})
 
 export const newCoupon = TryCatch(async (req, res, next) => {
   const { coupon: code, amount, isActive: activeState } = req.body;
@@ -30,7 +45,7 @@ export const newCoupon = TryCatch(async (req, res, next) => {
     throw error; // re-throw the error if it doesn't match the condition
   }
 });
-
+ 
 export const applyDiscount = TryCatch(async (req, res, next) => {
   const { coupon } = req.query;
   if (!coupon) {
