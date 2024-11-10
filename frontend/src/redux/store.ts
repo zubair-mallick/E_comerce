@@ -1,7 +1,7 @@
 import {configureStore} from '@reduxjs/toolkit'
 import { UserApi } from './api/userAPI'
 
-export const server =import.meta.env.VITE_SERVER
+ 
 
 export const store = configureStore({
     reducer:{
@@ -9,3 +9,5 @@ export const store = configureStore({
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(UserApi.middleware),
 })
+
+

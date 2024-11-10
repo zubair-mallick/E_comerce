@@ -4,10 +4,14 @@ import toast from "react-hot-toast"
 import {FcGoogle} from "react-icons/fc" 
 import { auth } from "../firebase"
 import { useLoginMutation } from "../redux/api/userAPI"
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query"
+import { newUserMessageResponse } from "../types/api-types"
 const login = () => {
 
-  const [gender,setGender] = useState("")
+  const [gender,setGender] = useState("male")
   const [date,setDate] = useState("")
+
+  
 
   const [login] = useLoginMutation()
 
@@ -16,16 +20,26 @@ const login = () => {
     {
       const provider= new GoogleAuthProvider()
       const {user}=  await signInWithPopup(auth,provider)
-      await login({
-        name:"as",
-        email:"asas",
-        photo:"asas",
-        gender:"asds",
-        dob:"asdsdsa",
+      const res =await login({
+        name: user.displayName!,
+        email:user.email!,
+        photo:user.photoURL!,
+        gender,
+        dob:date,
         role:"user",
-        _id:"sads"
+        _id:user.uid
 
-      })
+      });
+      if("data" in res) {
+        toast.success(res.data?.message || "undefined message")
+        return;
+
+      } else{
+        const error = res.error as FetchBaseQueryError
+        const  message = (error.data as  newUserMessageResponse).message
+        toast.error(message)
+        return;
+      }
       console.log(user)
     } catch (error) {
       toast.error("Failed to login")
@@ -65,3 +79,4 @@ const login = () => {
 }
 
 export default login
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       

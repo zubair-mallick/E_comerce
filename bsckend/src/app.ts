@@ -12,7 +12,7 @@ import productRoute from "./routes/product.js"
 import orderRoute from "./routes/order.js"
 import paymentRoute from "./routes/payment.js"
 import dashboardRoute from "./routes/stats.js"
-
+import cors from "cors"
 
 config({
     path: "./.env"  
@@ -24,6 +24,7 @@ const stripeKey = process.env.STRIPE_KEY || "";
 
 
 
+
 connectdb()
 
 export const stripe = new Stripe(stripeKey)
@@ -31,6 +32,13 @@ export const stripe = new Stripe(stripeKey)
 export const myCache = new NodeCache()
 const app = express();
 
+app.use(cors({
+    origin: [process.env.CORS_ORIGIN!],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    credentials: true,
+}))
 app.use(express.json());
 app.use(morgan("dev"))
 

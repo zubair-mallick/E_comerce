@@ -39,6 +39,7 @@ export const newUser = TryCatch(async (
       return next(new ErrorHandler(`Missing fields: ${missingFields.join(", ")}`, 405));
     }
 
+   
      user = await User.create({
       name,
       email,
@@ -47,6 +48,8 @@ export const newUser = TryCatch(async (
       _id,
       dob: new Date(dob),
     });
+
+
 
     // Send success response
     return res.status(200).json({
@@ -65,12 +68,12 @@ export const newUser = TryCatch(async (
 
     // Handle invalid object ID errors (MongoDB)
     if (error instanceof mongoose.Error.CastError) {
-      return next(new ErrorHandler(`Invalid ID format: ${error.message}`, 400));
+      return next(new ErrorHandler(`Invalid ID format`, 400));
     }
 
     // Handle validation errors (schema validation)
     if (error instanceof mongoose.Error.ValidationError) {
-      return next(new ErrorHandler(`${error.message}`, 400));
+      return next(new ErrorHandler(`validation error input all fields properly `, 400));
     }
 
     // Handle any other unexpected errors

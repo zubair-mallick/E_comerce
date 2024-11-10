@@ -1,7 +1,9 @@
 import {createApi,fetchBaseQuery} from "@reduxjs/toolkit/query/react"
-import { server } from "../store"
+
 import { newUserMessageResponse } from "../../types/api-types"
 import { User } from "../../types/types"
+
+export const server =import.meta.env.VITE_SERVER || "http://localhost:3000/"
 
 export const UserApi = createApi({
     reducerPath: 'usersApi',
