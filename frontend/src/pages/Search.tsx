@@ -9,6 +9,7 @@ import {
 } from "../redux/api/productAPI";
 import toast from "react-hot-toast";
 
+
 const Search = () => {
   const {
     data: categoriesResponse,

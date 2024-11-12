@@ -16,6 +16,7 @@ export const newUser = TryCatch(async (
     // Check for missing fields
    
 
+    console.log("👋",_id)
     // Create the user
     let user = await User.findById(_id);  
 

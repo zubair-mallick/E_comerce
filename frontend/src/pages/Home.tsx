@@ -41,7 +41,7 @@ const Home = () => {
        </div>
         ) : isError ? (
           <p style={{ color: "red" }}>
-            {typedError?.data.message || "An error occurred. Please try again."}
+            {typedError?.data?.message || "An error occurred. Please try again."}
           </p>
         ) : (
           data?.products.map(product => (

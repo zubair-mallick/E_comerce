@@ -7,27 +7,29 @@ export type customError={
         success: boolean;
     }
 }
-
-export type newUserMessageResponse={
+export type messageResponse={
     success:boolean;
     message:string
 }
+
+export type newUserMessageResponse= messageResponse;
+
 export type UserResponse={
     success:boolean;
     user:User
 }
 
 
-export type AllProductsResponse={
-    success:boolean;
+export type AllProductsResponse= messageResponse &{
+   
     products:Product[]
-    message:string
+   
 }
 
-export type categoriesResponse={
-    success:boolean;
+export type categoriesResponse= messageResponse &{
+  
     categories:string[]
-    message:string
+  
 }
 
 
@@ -46,6 +48,11 @@ export type SearchProductsArguments=  {
     price?:number,
     minPrice?:number,
     page?: number,
- 
-    
+
 }
+
+export  type NewProductRequest ={
+    id:string,
+    formData:FormData
+}
+

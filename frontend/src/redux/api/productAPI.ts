@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-import { AllProductsResponse, categoriesResponse, SearchProductsArguments, SearchProductsResponse } from "../../types/api-types"
+import { AllProductsResponse, categoriesResponse, messageResponse, NewProductRequest, SearchProductsArguments, SearchProductsResponse } from "../../types/api-types"
 
 export const server =import.meta.env.VITE_SERVER || "http://localhost:3000/"
 
@@ -33,6 +33,12 @@ export const productApi = createApi({
             }
             return baseQuery
         } }),
+        newProduct:builder.mutation<messageResponse,NewProductRequest>({ query:({formData,id})=>({
+            url:`new?id=${id}`,
+            method:"POST",
+            body:formData
+        }) }),
+
         
 
 
@@ -40,4 +46,4 @@ export const productApi = createApi({
     })
 })
 
-export const { useLatestProductsQuery,useAllProductsQuery,useCategoriesQuery ,useSearchProductsQuery} = productApi
+export const { useLatestProductsQuery,useAllProductsQuery,useCategoriesQuery ,useSearchProductsQuery,useNewProductMutation} = productApi
