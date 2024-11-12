@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-import { AllProductsResponse } from "../../types/api-types"
+import { AllProductsResponse, categoriesResponse, SearchProductsArguments, SearchProductsResponse } from "../../types/api-types"
 
 export const server =import.meta.env.VITE_SERVER || "http://localhost:3000/"
 
@@ -13,9 +13,31 @@ export const productApi = createApi({
     endpoints: (builder) => ({
         latestProducts:builder.query<AllProductsResponse,string>({ query:()=>"latest" }),
         allProducts:builder.query<AllProductsResponse,string>({ query:(id)=>`admin-products?id=${id}` }),
+        categories:builder.query<categoriesResponse,string>({ query:()=>`categories` }),
+        searchProducts:builder.query<SearchProductsResponse,SearchProductsArguments>({ query:({category,page,price,search,sort,minPrice})=>{
+            let baseQuery = `all?page=${page? page : 1}`
+            if(price){
+                baseQuery += `&price=${price}`
+            }
+            if(category){
+                baseQuery += `&category=${category}`
+            }
+            if(sort){
+                baseQuery += `&sort=${sort}`
+            }
+            if(search){
+                baseQuery += `&search=${search}`
+            }
+            if(minPrice){
+                baseQuery += `&minPrice=${minPrice}`
+            }
+            return baseQuery
+        } }),
+        
+
 
         
     })
 })
 
-export const { useLatestProductsQuery,useAllProductsQuery } = productApi
+export const { useLatestProductsQuery,useAllProductsQuery,useCategoriesQuery ,useSearchProductsQuery} = productApi

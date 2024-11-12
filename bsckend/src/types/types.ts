@@ -25,6 +25,8 @@ export interface NewUserRequestBody {
     limit?:string | number;
     search?:string;
     price?:string | number;
+    minPrice?:string | number;
+
     category?: string;
     sort? : string;
     page?: number;  

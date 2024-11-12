@@ -219,7 +219,6 @@ export const deleteProduct = TryCatch(async (req, res, next) => {
     message: "product deleted sucessfully",
   });
 });
-
 export const getAllProducts = TryCatch(
   async (req: Request<{}, {}, {}, SearchRequestQuery>, res, next) => {
     const {
@@ -227,6 +226,7 @@ export const getAllProducts = TryCatch(
       sort,
       category,
       price,
+      minPrice, // Added minPrice to the destructured query
       page: pageFromQuery,
       limit: limitFromQuery,
     } = req.query;
@@ -246,22 +246,28 @@ export const getAllProducts = TryCatch(
     if (category) {
       query.category = category;
     }
-    // Filter by price if it exists (less than or equal to the provided price)
-    if (price) {
-      query.price = { $lte: Number(price) };
+    // Filter by price range if minPrice and/or maxPrice (price) are provided
+    if (minPrice || price) {
+      query.price = {};
+      if (minPrice) {
+        query.price.$gte = Number(minPrice); // Greater than or equal to minPrice
+      }
+      if (price) {
+        query.price.$lte = Number(price); // Less than or equal to price (maxPrice)
+      }
     }
 
     const [products, allProductsWithFilters] = await Promise.all([
       Product.find(query)
-        .sort(sort && { price: sort == "asc" ? 1 : -1 })
+        .sort(sort && { price: sort === "asc" ? 1 : -1 })
         .skip(skip)
         .limit(limit),
 
       Product.find(query),
     ]);
-    const totatPage = Math.ceil(allProductsWithFilters.length / limit);
+    const totalPage = Math.ceil(allProductsWithFilters.length / limit);
 
-    if (page > totatPage) {
+    if (page > totalPage) {
       return next(
         new ErrorHandler(`No products found for the provided criteria`, 404)
       );
@@ -269,8 +275,8 @@ export const getAllProducts = TryCatch(
 
     return res.status(200).json({
       success: true,
-      isFirstPAge: page == 1,
-      isLastPage: totatPage == page,
+      isFirstPage: page === 1,
+      isLastPage: totalPage === page,
       products,
       message: "Products based on query fetched successfully",
     });

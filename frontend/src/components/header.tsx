@@ -33,7 +33,7 @@ const header = ({user}:PropsType) => {
   return (
    <nav  className='header' >
          <Link to={"/"} onClick={()=>setIsOpen(false)} >HOME</Link>
-         <Link to={"/seacrh"} onClick={()=>setIsOpen(false)} ><FaSearch/></Link>
+         <Link to={"/search"} onClick={()=>setIsOpen(false)} ><FaSearch/></Link>
          <Link to={"/cart"} onClick={()=>setIsOpen(false)}><FaShoppingBag/></Link>
 
         { user?._id ? (<>

@@ -45,40 +45,38 @@ function TableHOC<T extends Object>(
         <h2 className="heading">{heading}</h2>
 
         <table className="table" {...getTableProps()}>
-          <thead>
-            {headerGroups.map((headerGroup) => (
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => (
-                  <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                    {column.render("Header")}
-                    {column.isSorted && (
-                      <span>
-                        {" "}
-                        {column.isSortedDesc ? (
-                          <AiOutlineSortDescending />
-                        ) : (
-                          <AiOutlineSortAscending />
-                        )}
-                      </span>
-                    )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody {...getTableBodyProps()}>
-            {page.map((row) => {
-              prepareRow(row);
+        <thead>
+  {headerGroups.map((headerGroup, index) => (
+    <tr key={index} {...headerGroup.getHeaderGroupProps()}>
+      {headerGroup.headers.map((column) => (
+        <th key={column.id} {...column.getHeaderProps(column.getSortByToggleProps())}>
+          {column.render("Header")}
+          {column.isSorted && (
+            <span>
+              {column.isSortedDesc ? <AiOutlineSortDescending /> : <AiOutlineSortAscending />}
+            </span>
+          )}
+        </th>
+      ))}
+    </tr>
+  ))}
+</thead>
+<tbody {...getTableBodyProps()}>
+  {page.map((row, rowIndex) => {
+    prepareRow(row);
 
-              return (
-                <tr {...row.getRowProps()}>
-                  {row.cells.map((cell) => (
-                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
+    return (
+      <tr key={rowIndex} {...row.getRowProps()}>
+        {row.cells.map((cell, cellIndex) => (
+          <td key={cellIndex} {...cell.getCellProps()}>
+            {cell.render("Cell")}
+          </td>
+        ))}
+      </tr>
+    );
+  })}
+</tbody>
+
         </table>
 
         {showPagination && (

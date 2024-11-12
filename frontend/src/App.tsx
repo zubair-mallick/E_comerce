@@ -54,9 +54,9 @@ const App =  () => {
 
     onAuthStateChanged(auth,async (user)=>{
       if(user){
-       console.log("loggedin")
+      //  console.log("loggedin")
         const data = await  getUser(user.uid)
-        console.log(data)
+        // console.log(data)
         dispatch(makeUserExist(data!.user!))
       }else{
        console.log("not loggedin")

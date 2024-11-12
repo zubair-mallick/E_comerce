@@ -54,7 +54,7 @@ const Products = () => {
 
 
   useEffect(()=>{
-    console.log({message:data?.message})
+    // console.log({message:data?.message})
     if(isSuccess) toast.success(data.message,{position:'bottom-center'})
     if(isError) toast.error((error as customError).data.message)
   },[error,isSuccess])
