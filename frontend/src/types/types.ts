@@ -15,7 +15,7 @@ export interface Product{
     price: number;
     stock: number;
     category: string;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
+    createdAt?: string;
+    updatedAt?: string;
+    __v?: number;
 }

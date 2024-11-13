@@ -15,7 +15,7 @@ export const getlatestProducts = TryCatch(
     if (myCache.has("latest-product"))
       products = JSON.parse(myCache.get("latest-product") as string);
     else {
-      products = await Product.find({}).sort({ createdAt: -1 }).limit(5);
+      products = await Product.find({}).sort({ createdAt: -1 }).limit(6);
       myCache.set("latest-product", JSON.stringify(products));
     }
 

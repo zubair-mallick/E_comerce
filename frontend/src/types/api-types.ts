@@ -56,3 +56,21 @@ export  type NewProductRequest ={
     formData:FormData
 }
 
+export type productDetailResponse = {
+    success:boolean;
+    message:string
+    product: Product;
+   
+}
+export  type updateProductRequest ={
+    userId:string,
+    productId:string,
+    formData:FormData
+
+}
+export  type deleteProductRequest ={
+    userId:string,
+    productId:string,
+
+
+}

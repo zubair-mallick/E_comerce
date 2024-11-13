@@ -46,33 +46,35 @@ function TableHOC<T extends Object>(
 
         <table className="table" {...getTableProps()}>
         <thead>
-  {headerGroups.map((headerGroup, index) => (
-    <tr key={index} {...headerGroup.getHeaderGroupProps()}>
-      {headerGroup.headers.map((column) => (
-        <th key={column.id} {...column.getHeaderProps(column.getSortByToggleProps())}>
-          {column.render("Header")}
-          {column.isSorted && (
-            <span>
-              {column.isSortedDesc ? <AiOutlineSortDescending /> : <AiOutlineSortAscending />}
-            </span>
-          )}
-        </th>
-      ))}
-    </tr>
-  ))}
+        {headerGroups.map((headerGroup) => (
+  <tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id || headerGroup.headers.map((col) => col.id).join('-')}>
+    {headerGroup.headers.map((column) => (
+      <th {...column.getHeaderProps(column.getSortByToggleProps())} key={column.id}>
+        {column.render("Header")}
+        {column.isSorted && (
+          <span>
+            {column.isSortedDesc ? <AiOutlineSortDescending /> : <AiOutlineSortAscending />}
+          </span>
+        )}
+      </th>
+    ))}
+  </tr>
+))}
+
 </thead>
 <tbody {...getTableBodyProps()}>
   {page.map((row, rowIndex) => {
     prepareRow(row);
 
     return (
-      <tr key={rowIndex} {...row.getRowProps()}>
-        {row.cells.map((cell, cellIndex) => (
-          <td key={cellIndex} {...cell.getCellProps()}>
-            {cell.render("Cell")}
-          </td>
-        ))}
-      </tr>
+      <tr {...row.getRowProps()} key={row.id || rowIndex}>
+  {row.cells.map((cell) => (
+    <td {...cell.getCellProps()} key={cell.column.id}>
+      {cell.render("Cell")}
+    </td>
+  ))}
+</tr>
+
     );
   })}
 </tbody>

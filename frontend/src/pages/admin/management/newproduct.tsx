@@ -69,7 +69,11 @@ const NewProduct = () => {
       if("error" in res){
        throw res.error
       }
-     toast.success(res.data?.message!);
+      else{
+        toast.success(res.data?.message!);
+        navigate(`/admin/product`);
+      }
+      
     } catch (error ) {
       if ((error as ApiError) && (error as ApiError).data && (error as ApiError).data.message) {
         toast.error((error as ApiError).data.message);
