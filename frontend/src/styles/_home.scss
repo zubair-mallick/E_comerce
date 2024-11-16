@@ -30,20 +30,20 @@
         gap: 1rem;
         overflow-x: auto;
 
-        &::-webkit-scrollbar{
-           height: 8px;
-           background: #000;
-        }
-        &::-webkit-scrollbar-thumb{
+        // &::-webkit-scrollbar{
+        //    height: 8px;
+        //    background: #000;
+        // }
+        // &::-webkit-scrollbar-thumb{
            
-            background: #110707;
-        }
+        //     background: #110707;
+        // }
     } 
 }
 
 .product-card{
     width: 18.75rem;
-    height: 25rem;
+    // height: 25rem;
     padding: 1rem;
     flex:none;
     @include flex(column,flex-start,center,4px);

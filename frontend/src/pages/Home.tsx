@@ -3,6 +3,10 @@ import Productcard from "../components/product_card";
 import { useLatestProductsQuery } from "../redux/api/productAPI";
 
 import { SkeletonCard } from "../components/Loader";
+import { cartItem } from "../types/types";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../redux/reducer/cartReducer";
 
   
 // Import Swiper styles
@@ -21,9 +25,12 @@ const Home = () => {
 // Safely typecast the error to `CustomErrorType`
   const typedError = error as CustomErrorType | undefined;
 
-  console.log(data)
+  const dispatch = useDispatch()
 
-  const addToCartHandler = () => {};
+  const addToCartHandler = (cartItem:cartItem) => {
+    if(cartItem.stock<1) return toast.error("out of Stock");
+    dispatch(addToCart(cartItem));
+  };
 
   return (
     <div className="home">
@@ -52,7 +59,7 @@ const Home = () => {
               price={product.price}
               stock={product.stock}
               handler={addToCartHandler}
-              picture={product.photo}
+              photo={product.photo}
             />
           ))
         )}

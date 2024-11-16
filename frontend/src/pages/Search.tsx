@@ -8,6 +8,9 @@ import {
   useSearchProductsQuery,
 } from "../redux/api/productAPI";
 import toast from "react-hot-toast";
+import { cartItem } from "../types/types";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../redux/reducer/cartReducer";
 
 
 const Search = () => {
@@ -29,8 +32,11 @@ const Search = () => {
 
   // Debouncing the search to avoid too many API calls
   const [debouncedSearch, setDebouncedSearch] = useState(search);
-
-  const addToCartHandler = () => {};
+const dispatch = useDispatch()
+  const addToCartHandler = (cartItem:cartItem) => {
+    if(cartItem.stock<1) return toast.error("out of Stock");
+    dispatch(addToCart(cartItem));
+  };
 
   const {
     data: searchData,
@@ -171,7 +177,8 @@ const Search = () => {
                 price={product.price}
                 stock={product.stock}
                 handler={addToCartHandler}
-                picture={product.photo}
+                photo={product.photo}
+                
               />
             ))
           )}

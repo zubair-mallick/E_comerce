@@ -1,25 +1,19 @@
-import React, { useEffect, useState } from 'react'
-import {VscError} from 'react-icons/vsc'
-import CartItem from '../components/CartItem'
+import { useEffect, useState } from 'react'
+import { VscError } from 'react-icons/vsc'
 import { Link } from 'react-router-dom'
-import { RiH1 } from 'react-icons/ri'
-const cart={
-cartItems:[{productid:"asdsd",photo:"https://images-eu.ssl-images-amazon.com/images/G/31/Img23/Budget3/REC-PC_CC_379x304._SY304_CB564096366_.jpg",
-  name:"Macbook",
-  price:3000,
-  quantity:4,
-  stock:10
-}],
-subTotal:4000,
-tax:Math.round(4000*.18),
-shippingCharges:200,
-total:4000 + Math.round(4000*.18),
-discount:400
-}
+import CartItem from '../components/CartItem'
+import { useDispatch, useSelector } from 'react-redux'
+import { cartReducerInitialState } from '../types/reducer-types'
+import { addToCart, calculatePrice, removeCartItem } from '../redux/reducer/cartReducer'
+import { cartItem } from '../types/types'
+import toast from 'react-hot-toast'
 
 const Cart = () => {
+  const {cartItems,subtotal,tax,total,shippingCharges,discount} = useSelector((state:{ cartReducer:cartReducerInitialState})=> state.cartReducer)
   const [couponCode,setCouponCode]= useState<string>("")
   const [isValidCouponCode,setIsValidCouponCode]= useState<boolean>(true)
+
+  const dispatch = useDispatch();
 
   useEffect(() =>{
     const timeOutId = setTimeout(() =>{
@@ -37,29 +31,44 @@ const Cart = () => {
       setIsValidCouponCode(false)
     }
   })
+
+  const addToCartHandler = (cartItem:cartItem) => {
+    if(cartItem.quantity>=cartItem.stock) {
+      toast.error("Out of Stock");
+      return;
+    }
+    dispatch(addToCart(cartItem));
+  };
+  const removeFromCartHandler = (cartItem:cartItem) => {
+    
+    dispatch(removeCartItem(cartItem));
+  };
+   useEffect(() =>{
+    dispatch(calculatePrice())
+   },[cartItems,dispatch])
   
   return (
     <div className='cart'>
       <main>
-        {cart.cartItems.length>0? (cart.cartItems.map((item,idx)=> <CartItem key={idx} cartItem={item}/>)) : <h1>No Items Added</h1>  }
+        {cartItems.length>0? (cartItems.map((item,idx)=> <CartItem key={idx} cartItem={item}removeFromCartHandler={removeFromCartHandler}  addToCartHandler={addToCartHandler}/>)) : <h1>No Items Added</h1>  }
       </main>
       <aside>
-          <p>Subtotatal:₹{cart.subTotal} </p>
-          <p>Shipping Charges:₹{cart.shippingCharges} </p>
-          <p>Tax:₹{cart.tax} </p>
-          <p>discount:<em className='red'>-₹{cart.discount}</em></p> 
-          <p>total:₹{cart.total}</p>
+          <p>Subtotatal:₹{subtotal} </p>
+          <p>Shipping Charges:₹{shippingCharges} </p>
+          <p>Tax:₹{tax} </p>
+          <p>discount:<em className='red'>-₹{discount}</em></p> 
+          <p>total:₹{total}</p>
 
         <input type="text"
         placeholder='Coupon Code'
         value={couponCode} onChange={(e)=>setCouponCode(e.target.value)} 
         />
         {
-          couponCode && (isValidCouponCode? (<span className='green'>₹{cart.discount} off using the <code >{couponCode}</code> </span>) :( <span className='red'>Invalid coupon <VscError/></span>))
+          couponCode && (isValidCouponCode? (<span className='green'>₹{discount} off using the <code >{couponCode}</code> </span>) :( <span className='red'>Invalid coupon <VscError/></span>))
         }
 
         {
-          cart.cartItems.length>0 && <Link to='/shipping'>Checkout</Link>
+          cartItems.length>0 && <Link to='/shipping'>Checkout</Link>
         }
 
       </aside>
