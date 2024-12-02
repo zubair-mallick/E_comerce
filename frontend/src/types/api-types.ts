@@ -39,7 +39,11 @@ export type SearchProductsResponse= AllProductsResponse & {
     isLastPage: boolean,
     
 }
-
+export type DeleteUserRequest = {
+    userId: string;
+    adminUserId: string;
+  };
+  
 export type SearchProductsArguments=  {
    
     search?: string,
@@ -98,4 +102,8 @@ export type AllOrdersResponse = {
   export type UpdateOrderRequest = {
     userId: string;
     orderId: string;
+  };
+  export type AllUsersResponse = {
+    success: boolean;
+    users: User[];
   };

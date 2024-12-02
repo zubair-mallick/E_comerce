@@ -13,7 +13,8 @@ import {
 import { cartItem } from "../types/types";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { server } from "../redux/api/userAPI";
+import { server } from "../redux/api/productAPI";
+
 
 const Cart = () => {
   const { cartItems, subtotal, tax, total, shippingCharges, discount } =

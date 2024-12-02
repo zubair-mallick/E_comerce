@@ -1,11 +1,11 @@
 import { ReactElement, useEffect, useState } from "react";
-import TableHOC from "../components/admin/TableHOC"
-import { Column } from "react-table";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { useAllOrdersQuery, useMyOrdersQuery } from "../redux/api/orderAPI";
-import { UserReducerInitialState } from "../types/reducer-types";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { Column } from "react-table";
+import TableHOC from "../components/admin/TableHOC";
+import { useMyOrdersQuery } from "../redux/api/orderAPI";
+import { RootState } from "../redux/store";
 import { customError } from "../types/api-types";
 
 type DataType={
@@ -47,7 +47,7 @@ const columns: Column<DataType>[]=[{
 
 const Orders = () => {
     // Accessing the current user from the Redux store
-    const { user } = useSelector((state:{userReducer:UserReducerInitialState}) => state.userReducer);
+    const { user } = useSelector((state:RootState) => state.userReducer);
 
     // Query for fetching all orders associated with the user
     const { isLoading, data, isError, error } = useMyOrdersQuery(user?._id!);

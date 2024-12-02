@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { productApi } from './api/productAPI'
-import { UserApi } from './api/userAPI'
+import { userAPI } from './api/userAPI'
 import { userReducer } from './reducer/userReducer'
 import { cartReducer } from './reducer/cartReducer'
 import { orderApi } from './api/orderAPI'
@@ -9,7 +9,7 @@ import { orderApi } from './api/orderAPI'
 
 export const store = configureStore({
     reducer:{
-        [UserApi.reducerPath]: UserApi.reducer,
+        [userAPI.reducerPath]: userAPI.reducer,
         [productApi.reducerPath]: productApi.reducer,
         [orderApi.reducerPath]:orderApi.reducer,
 
@@ -21,7 +21,9 @@ export const store = configureStore({
 
 
     },
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(UserApi.middleware,productApi.middleware,orderApi.middleware),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(userAPI.middleware,productApi.middleware,orderApi.middleware),
 })
+
+export type RootState= ReturnType<typeof store.getState>
 
 
