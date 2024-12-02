@@ -1,16 +1,16 @@
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Loader from "./components/Loader";
-import Header  from "./components/header";
-import {Toaster} from "react-hot-toast"
-import { lazy, Suspense, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./firebase.ts";
-import { makeUserExist, makeUserNotExist } from "./redux/reducer/userReducer.ts";
-import { useDispatch,useSelector } from "react-redux";
-import { getUser } from "./redux/api/userAPI.ts";
-import { UserReducerInitialState } from "./types/reducer-types.ts";
+import { lazy, Suspense, useEffect } from "react";
+import { Toaster } from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import Loader from "./components/Loader";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import Header from "./components/header";
+import { auth } from "./firebase.ts";
+import { getUser } from "./redux/api/userAPI.ts";
+import { makeUserExist, makeUserNotExist } from "./redux/reducer/userReducer.ts";
+import { UserReducerInitialState } from "./types/reducer-types.ts";
 
 
 
@@ -21,7 +21,7 @@ const Cart = lazy(() => import("./pages/Cart"));
 const Shipping = lazy(() => import("./pages/shipping"));
 const Orders = lazy(() => import("./pages/Orders"));
 const OrderDetails = lazy(() => import("./pages/orderDetails.tsx"));
-
+const Checkout = lazy(()=>import("./pages/checkout.tsx"))
 
 //admin Routes import start
 const Dashboard = lazy(() => import("./pages/admin/dashboard"));
@@ -41,6 +41,8 @@ const ProductManagement = lazy(
 const TransactionManagement = lazy(
   () => import("./pages/admin/management/transactionmanagement")
 );
+
+const NotFound = lazy(() => import("./pages/notFound.tsx"))
 
 //admin routes import end
 const App =  () => {
@@ -88,6 +90,7 @@ const App =  () => {
             <Route path="/shipping" element={<Shipping />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/order/:id" element={<OrderDetails />} />
+            <Route path="/pay" element={<Checkout />} />
 
        </Route>
 
@@ -127,7 +130,8 @@ const App =  () => {
             element={<TransactionManagement />}
           />
         </Route>
-        ;
+        
+        <Route path="*" element={<NotFound/>}/>
       </Routes>
     </Suspense>
     <Toaster position="bottom-center" />
