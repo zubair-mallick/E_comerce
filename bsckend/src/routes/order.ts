@@ -10,7 +10,7 @@ app.get("/populate",isAdmin,generateOrders)
 
 app.get("/my",myOrders)
 app.get("/all",isAdmin,allOrders)
-app.get("/process/:id",processOrder)
+app.put("/process/:id",isAdmin,processOrder)
 
 app.route("/:id").get(getSingleOrder).delete(isAdmin,deleteOrder);
 

@@ -59,7 +59,7 @@ export const applyDiscount = TryCatch(async (req, res, next) => {
     return next(new ErrorHandler("Coupon is no longer active or used", 404));
   }
 
-  discount.isActive = false;
+  // discount.isActive = false;
 
   await discount.save();
 

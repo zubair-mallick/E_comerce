@@ -14,7 +14,7 @@ export const connectdb = () => {
 export const invalidateCache =  ({
             product,
             order,
-            admin,
+            admin, 
             userId,
             orderId,
             productId,

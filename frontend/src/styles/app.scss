@@ -309,4 +309,15 @@
       transform: translate(-50%, -20%);
     }
   }
-  
+  .skeleton-loader {
+    display: flex;
+    flex-direction: column;
+  }
+  .skeleton-shape {
+    height: 30px;
+    width: 100%;
+    background-color: #ddd;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    animation: skeleon-loading 1.5s infinite;
+  }

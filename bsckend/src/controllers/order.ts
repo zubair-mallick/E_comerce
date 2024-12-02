@@ -20,14 +20,19 @@ export const myOrders = TryCatch(
     if(myCache.has(`my-orders-${user}`)) orders = JSON.parse(myCache.get(`my-orders-${user}`)as string)
     else{
       orders = await Order.find({user})
+      console.log({orders,user})
       if(!orders) return next(new ErrorHandler(`No orders found for user: ${user}`, 404))
       
       myCache.set(`my-orders-${user}`, JSON.stringify(orders))
+      if(!orders.length || !orders[0]?.orderItems?.length ){
+        return next(new ErrorHandler(`No orders found for user`, 404))
+      }
+
     }
     return res.status(200).json({
       success: true,
       orders,
-      no_of_orders: orders[0].orderItems.length,
+      no_of_orders: orders[0]?.orderItems?.length,
       message: "all orders fetched of user sucessfully",
     });
 

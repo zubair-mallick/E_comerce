@@ -1,7 +1,12 @@
-import { ReactElement, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import TableHOC from "../components/admin/TableHOC"
 import { Column } from "react-table";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useAllOrdersQuery, useMyOrdersQuery } from "../redux/api/orderAPI";
+import { UserReducerInitialState } from "../types/reducer-types";
+import toast from "react-hot-toast";
+import { customError } from "../types/api-types";
 
 type DataType={
     _id: string;
@@ -41,20 +46,61 @@ const columns: Column<DataType>[]=[{
 ]
 
 const Orders = () => {
-        const [rows] = useState<DataType[]>([
-          {  _id: "asdsdasdsd",
-            amount: 45445,
-            quantity: 23,
-            discount: 2323,
-            status: <span className="red">Processing</span>,
-            action: <Link to={`/order/${"asdsdasdsd"}`}>view</Link>
-        }
+    // Accessing the current user from the Redux store
+    const { user } = useSelector((state:{userReducer:UserReducerInitialState}) => state.userReducer);
+
+    // Query for fetching all orders associated with the user
+    const { isLoading, data, isError, error } = useMyOrdersQuery(user?._id!);
+
+
+        const [rows,setRows] = useState<DataType[]>([
+         
         ]);
+
+        if (isError) {
+          const err = error as customError;
+          toast.error(err.data.message);
+        }
+      
+        // Populating rows when data is successfully fetched
+        useEffect(() => {
+          if (data) {
+           data.orders.map((i)=>{
+             if(!i.user){
+              console.log(i)
+             }
+           })
+           console.log(data)
+            
+            setRows(
+              data.orders.map((i) => ({
+                _id: i._id,
+                amount: Number((i.total).toFixed(2)),
+                discount: i.discount,
+                quantity: i.orderItems.length,
+                status: (
+                  <span
+                    className={
+                      i.status === "Processing"
+                        ? "red"
+                        : i.status === "Shipped"
+                        ? "green"
+                        : "purple"
+                    }
+                  >
+                    {i.status}
+                  </span>
+                ),
+                action: <Link to={`/admin/transaction/${i._id}`}>Manage</Link>,
+              }))
+            );
+          }
+        }, [data]);
     const table = TableHOC<DataType>(columns,rows,"dashboard-product-box","Orders",!(rows.length<6))()
   return (
     <div className="container">
       <h1>My Orders</h1> 
-      {table}
+      <main>{isLoading ?  "Loading": table}</main>
     </div>
   )
 }

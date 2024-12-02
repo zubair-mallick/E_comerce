@@ -1,30 +1,54 @@
 import { FaTrash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import { OrderItem } from "../../../models/types";
-import { server } from "../../../redux/store";
+import { responseToast } from "../../../utils/features.ts";
 
-const img =
-  "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8c2hvZXN8ZW58MHx8MHx8&w=1000&q=804";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { Skeleton } from "../../../components/Loader";
+import { useDeleteOrderMutation, useOrderDetailsQuery, useUpdateOrderMutation } from "../../../redux/api/orderAPI";
+import { customError } from "../../../types/api-types";
+import { UserReducerInitialState } from "../../../types/reducer-types";
+import { OrderItem } from "../../../types/types";
 
-const orderItems: OrderItem[] = [
-  {
-    name: "Puma Shoes",
-    photo: img,
-    id: "asdsaasdas",
-    quantity: 4,
-    price: 2000,
-  },
-];
+const defaultOrderItems ={
+shippingInfo: {
+  address: "",
+  city: "",
+  state: "",
+  country: "",
+  pincode: 0,
+ },
+ status: "",
+ subtotal: 0,
+ discount: 0,
+ shippingCharges: 0,
+ tax: 0,
+ total: 0,
+ orderItems:[],
+ user:{
+  _id: "",
+  name: "",
+},
+_id:""
+}
+
 
 const TransactionManagement = () => {
+
+  const { user } = useSelector((state:{userReducer:UserReducerInitialState}) => state.userReducer);
+
+  const params = useParams();
+
+  const navigate = useNavigate();
+
+  const { isLoading, data, isError, error } = useOrderDetailsQuery(params.id!);
+  const {shippingInfo:{address,city,state,country,pincode},orderItems,user:{name},status,tax,subtotal,total,discount,shippingCharges} = data?.order || defaultOrderItems
+
   const [order, setOrder] = useState({
     name: "Puma Shoes",
-    address: "77 black street",
-    city: "Neyword",
-    state: "Nevada",
-    country: "US",
-    pinCode: 242433,
+   
     status: "Processing",
     subtotal: 4000,
     discount: 1200,
@@ -34,32 +58,47 @@ const TransactionManagement = () => {
     orderItems,
   });
 
-  const {
-    name,
-    address,
-    city,
-    country,
-    state,
-    pinCode,
-    subtotal,
-    shippingCharges,
-    tax,
-    discount,
-    total,
-    status,
-  } = order;
 
-  const updateHandler = (): void => {
-    setOrder((prev) => ({
-      ...prev,
-      status: "Shipped",
-    }));
+ const [updateOrder] = useUpdateOrderMutation()
+ const [deleteOrder] = useDeleteOrderMutation()
+
+  const updateHandler =async()=> {
+   const res  = await updateOrder({
+    userId: user?._id!,
+    orderId: data?.order._id!,
+   })
+   responseToast(res,navigate,"/admin/transaction")
+   
   };
+  const deleteHandler = async() => {
+    const res  = await deleteOrder({
+      userId: user?._id!,
+      orderId: data?.order._id!,
+     })
+     responseToast(res,navigate,"/admin/transaction")
+  };
+  useEffect(()=>{
+    if (isError) {
+      const statusCode = (error as customError).status; // Assuming 'status' contains the HTTP status code
+      if (statusCode === 404 || statusCode ===400) {
+        toast.error("Product not found.");
+        navigate("/404");  
+        return;
+      }
+  
+      const currentError = (error as { data: { message: string } }).data.message;
+      if ( currentError) {
+        toast.error(currentError);
+     
+      }
+    }
+  },[error,data])
 
   return (
     <div className="admin-container">
       <AdminSidebar />
       <main className="product-management">
+       { isLoading? <Skeleton /> :<>
         <section
           style={{
             padding: "2rem",
@@ -67,11 +106,11 @@ const TransactionManagement = () => {
         >
           <h2>Order Items</h2>
 
-          {orderItems.map((i) => (
+          {orderItems.map((i:any) => (
             <ProductCard
               key={i._id}
               name={i.name}
-              photo={`${server}/${i.photo}`}
+              photo={i.photo}
               productId={i.productId}
               _id={i._id}
               quantity={i.quantity}
@@ -88,7 +127,7 @@ const TransactionManagement = () => {
           <h5>User Info</h5>
           <p>Name: {name}</p>
           <p>
-            Address: {`${address}, ${city}, ${state}, ${country} ${pinCode}`}
+            Address: {`${address}, ${city}, ${state}, ${country} ${pincode}`}
           </p>
           <h5>Amount Info</h5>
           <p>Subtotal: {subtotal}</p>
@@ -115,7 +154,7 @@ const TransactionManagement = () => {
           <button className="shipping-btn" onClick={updateHandler}>
             Process Status
           </button>
-        </article>
+        </article></> }
       </main>
     </div>
   );

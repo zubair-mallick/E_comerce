@@ -70,8 +70,15 @@ export const cartReducer = createSlice({
       }
       state.tax = Math.round((state.subtotal * 0.18));
       state.total = Math.round((state.shippingCharges +state.tax +state.subtotal - state.discount))
+      state.total = state.total>=0?state.total:0
+    },
+
+    discountApplied:(state, action: PayloadAction<number>)=>{
+      state.loading = true; 
+      state.discount = action.payload
+      state.loading = false;
     }
   }
 });
 
-export const { addToCart, removeCartItem ,calculatePrice} = cartReducer.actions;
+export const { addToCart, removeCartItem ,calculatePrice,discountApplied} = cartReducer.actions;

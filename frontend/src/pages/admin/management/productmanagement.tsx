@@ -8,6 +8,7 @@ import { useProductDetailsQuery, useUpdateProductMutation, useDeleteProductMutat
 import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
 import 'react-loading-skeleton/dist/skeleton.css';
+import { customError } from "../../../types/api-types";
 
 const Productmanagement = () => {
   const { user } = useSelector(
@@ -105,6 +106,13 @@ const Productmanagement = () => {
     }
 
     if (error) {
+      const statusCode = (error as customError).status; // Assuming 'status' contains the HTTP status code
+      if (statusCode === 404 || statusCode ===400) {
+        toast.error("Product not found.");
+        navigate("/404");
+        return;
+      }
+
       const currentError = (error as { data: { message: string } }).data.message;
       if (preverror !== currentError) {
         toast.error(currentError);
