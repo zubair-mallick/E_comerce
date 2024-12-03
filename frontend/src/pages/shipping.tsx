@@ -6,8 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { saveShippingInfo } from "../redux/reducer/cartReducer";
 import { cartReducerInitialState, UserReducerInitialState } from "../types/reducer-types";
-import { server } from "../redux/api/userAPI";
 import { shippingInfo } from "../types/types";
+import { server } from "../redux/api/productAPI";
 
 
 const Shipping = () => {

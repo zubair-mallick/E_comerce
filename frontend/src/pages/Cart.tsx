@@ -45,7 +45,7 @@ const Cart = () => {
             setIsValidCouponCode(false);
             dispatch(discountApplied(0));
             dispatch(calculatePrice());
-            // toast.error(err.response.data.message || "server error");
+            toast.error(err.response.data.message || "server error");
           });
       }
     }, 1000);

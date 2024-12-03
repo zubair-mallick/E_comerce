@@ -3,7 +3,7 @@ import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import toast from "react-hot-toast";
 import { NavigateFunction } from "react-router-dom";
 import { messageResponse } from "../types/api-types";
-
+import moment from "moment";
 type ResType =
   | {
       data: messageResponse;
@@ -25,4 +25,31 @@ export const responseToast = (
     const messageResponse = error.data as messageResponse;
     toast.error(messageResponse.message);
   }
+};
+
+
+export const getLastMonths = () => {
+  const currentDate = moment();
+
+  currentDate.date(1);
+
+  const last6Months: string[] = [];
+  const last12Months: string[] = [];
+
+  for (let i = 0; i < 6; i++) {
+    const monthDate = currentDate.clone().subtract(i, "months");
+    const monthName = monthDate.format("MMMM");
+    last6Months.unshift(monthName);
+  }
+
+  for (let i = 0; i < 12; i++) {
+    const monthDate = currentDate.clone().subtract(i, "months");
+    const monthName = monthDate.format("MMMM");
+    last12Months.unshift(monthName);
+  }
+
+  return {
+    last12Months,
+    last6Months,
+  };
 };
