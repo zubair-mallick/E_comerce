@@ -2,9 +2,9 @@
 import ContentLoader from "react-content-loader"
 const Loading = () => {
   return (
-    <div>
-      Loading
-    </div>
+    <section className="loader">
+      <div></div>
+    </section>
   )
 }
 
