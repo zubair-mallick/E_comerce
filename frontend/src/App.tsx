@@ -22,7 +22,7 @@ const Shipping = lazy(() => import("./pages/shipping"));
 const Orders = lazy(() => import("./pages/Orders"));
 const OrderDetails = lazy(() => import("./pages/orderDetails.tsx"));
 const Checkout = lazy(()=>import("./pages/checkout.tsx"))
-
+const ProductDetails = lazy(() => import("./pages/productDetails.tsx"));
 //admin Routes import start
 const Dashboard = lazy(() => import("./pages/admin/dashboard"));
 const Products = lazy(() => import("./pages/admin/products"));
@@ -77,7 +77,7 @@ const App =  () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
-        
+        <Route path="/product/:id" element={<ProductDetails />} />
        
        {/* not logged in route */}
        <Route path="/login" element={<ProtectedRoute isAuthenticated={user ?false :true} redirect="/">
