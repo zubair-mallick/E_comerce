@@ -4,7 +4,7 @@ import { TryCatch } from "./error.js";
 
 export const isAdmin =TryCatch(async(req,res,next)=>{
     const {id}= req.query;
-    console.log("here is admin");
+  
     
     if(!id) return next(new ErrorHandler("Login as admin to gain acess",401));
 

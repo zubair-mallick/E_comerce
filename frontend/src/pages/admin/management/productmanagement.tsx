@@ -18,8 +18,8 @@ const Productmanagement = () => {
   const navigate = useNavigate();
   const { data, isLoading, error } = useProductDetailsQuery(params.id!);
 
-  const { photo, category, name, price, stock } = data?.product || {
-    photo: "",
+  const { photos, category, name, price, stock } = data?.product || {
+    photos: ["", "", "", ""],
     category: "",
     name: "",
     price: 0,
@@ -31,37 +31,39 @@ const Productmanagement = () => {
   const [stockUpdate, setStockUpdate] = useState<number | undefined>(undefined);
   const [nameUpdate, setNameUpdate] = useState<string>(name);
   const [categoryUpdate, setCategoryUpdate] = useState<string>(category);
-  const [photoUpdate, setPhotoUpdate] = useState<string>(photo);
-  const [photoFile, setPhotoFile] = useState<File>();
+  const [photosUpdate, setPhotosUpdate] = useState<string[]>(photos);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [preverror, setPrevError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track if the form is submitting
 
   // Mutations
   const [updateProduct] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
 
+  // Handle file input change for multiple images
   const changeImageHandler = (e: ChangeEvent<HTMLInputElement>) => {
-    const file: File | undefined = e.target.files?.[0];
-    const reader: FileReader = new FileReader();
-
-    if (file) {
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        if (typeof reader.result === "string") {
-          setPhotoUpdate(reader.result);
-          setPhotoFile(file);
-        }
-      };
+    const files: FileList | null = e.target.files;
+    if (files) {
+      const filesArray = Array.from(files);
+      const filePreviews = filesArray.map((file) => URL.createObjectURL(file));
+      setPhotoFiles(filesArray);
+      setPhotosUpdate(filePreviews);
     }
   };
 
   const submitHandler = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
+    setIsSubmitting(true); // Disable button when submitting
     const formData = new FormData();
     if (nameUpdate) formData.set("name", nameUpdate);
     if (priceUpdate) formData.set("price", priceUpdate.toString());
     if (stockUpdate !== undefined) formData.set("stock", stockUpdate.toString());
-    if (photoFile) formData.set("photo", photoFile);
     if (categoryUpdate) formData.set("category", categoryUpdate);
+
+    // Add selected photo files to FormData
+    photoFiles.forEach((file) => {
+      formData.append("photos", file);
+    });
 
     try {
       const res = await updateProduct({
@@ -76,10 +78,13 @@ const Productmanagement = () => {
       }
     } catch (error) {
       toast.error("An error occurred while updating the product.");
+    } finally {
+      setIsSubmitting(false); // Re-enable button after submission
     }
   };
 
   const deleteHandler = async () => {
+    setIsSubmitting(true); // Disable button when deleting
     try {
       const res = await deleteProduct({
         userId: user?._id!,
@@ -93,6 +98,8 @@ const Productmanagement = () => {
       }
     } catch (error) {
       toast.error("An error occurred while deleting the product.");
+    } finally {
+      setIsSubmitting(false); // Re-enable button after deletion
     }
   };
 
@@ -101,13 +108,13 @@ const Productmanagement = () => {
       setNameUpdate(data.product.name);
       setPriceUpdate(data.product.price);
       setStockUpdate(data.product.stock);
-      setPhotoUpdate(data.product.photo);
+      setPhotosUpdate(data.product.photos);
       setCategoryUpdate(data.product.category);
     }
 
     if (error) {
-      const statusCode = (error as customError).status; // Assuming 'status' contains the HTTP status code
-      if (statusCode === 404 || statusCode ===400) {
+      const statusCode = (error as customError).status;
+      if (statusCode === 404 || statusCode === 400) {
         toast.error("Product not found.");
         navigate("/404");
         return;
@@ -116,7 +123,7 @@ const Productmanagement = () => {
       const currentError = (error as { data: { message: string } }).data.message;
       if (preverror !== currentError) {
         toast.error(currentError);
-        setPrevError(currentError); // Update previous error state
+        setPrevError(currentError);
       }
     }
   }, [data, error, preverror]);
@@ -136,7 +143,9 @@ const Productmanagement = () => {
           <>
             <section>
               <strong>ID - {params.id ? params.id : "loading..."}</strong>
-              <img src={photo} alt="Product" />
+              <div className="image-preview-container">
+                <img className="main-image-preview" src={photos[0]} alt={`Product`} />
+              </div>
               <p>{name}</p>
               {stock > 0 ? (
                 <span className="green">{stock} Available</span>
@@ -146,11 +155,19 @@ const Productmanagement = () => {
               <h3>₹{price}</h3>
             </section>
             <article>
-              <button className="product-delete-btn" onClick={deleteHandler}>
+              <button
+                className={`product-delete-btn`}
+                style={{
+                  backgroundColor: isSubmitting? "gray" : "",
+                  cursor: isSubmitting? "not-allowed" : "pointer",
+                }}
+                onClick={deleteHandler}
+                disabled={isSubmitting}
+              >
                 <FaTrash />
               </button>
               <form onSubmit={submitHandler}>
-                <h2>Manage</h2>
+                <h2>Manage Product</h2>
                 <div>
                   <label>Name</label>
                   <input
@@ -188,11 +205,23 @@ const Productmanagement = () => {
                   />
                 </div>
                 <div>
-                  <label>Photo</label>
-                  <input type="file" onChange={changeImageHandler} />
+                  <label>Photos</label>
+                  <input type="file" multiple onChange={changeImageHandler} />
                 </div>
-                {photoUpdate && <img src={photoUpdate} alt="New Image" />}
-                <button type="submit">Update</button>
+                <div className="image-preview-container">
+                  {photosUpdate.map((photo, index) => (
+                    <div className="image-preview" key={index}>
+                      <img src={photo} alt={`Preview ${index}`} />
+                    </div>
+                  ))}
+                </div>
+                <button
+                  className={`${isSubmitting ? 'button-disabled' : ''}`}
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  Update
+                </button>
               </form>
             </article>
           </>

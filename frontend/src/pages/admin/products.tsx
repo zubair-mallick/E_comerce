@@ -61,17 +61,22 @@ const Products = () => {
 
   
 
-    useEffect(()=>{
-      if(data) setRows(data.products.map(i=>({
-        photo:<img src={i.photo}></img>,
-        name:i.name,
-        price:i.price,
-        stock:i.stock,
-        action:<Link to={`/admin/product/${i._id}`}>Manage</Link>
-      })))
-      // console.log(rows)
-    },[data])
- 
+  useEffect(() => {
+    if (data) {
+      setRows(
+        [...data.products] // Create a shallow copy of the products array
+          .reverse() // Now you can safely reverse the copy
+          .map((i) => ({
+            photo: <img src={i.photos[0]} alt="Product" />,
+            name: i.name,
+            price: i.price,
+            stock: i.stock,
+            action: <Link to={`/admin/product/${i._id}`}>Manage</Link>,
+          }))
+      );
+    }
+  }, [data]);
+  
 
  
 

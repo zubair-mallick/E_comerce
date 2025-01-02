@@ -1,7 +1,7 @@
 export type User={
     name:string,
     email:string;
-    photo:string;
+    photos:string[];
     gender:string;
     role:string;
     dob:string;
@@ -11,7 +11,7 @@ export type User={
 export type Product={
     _id: string;
     name: string;
-    photo: string;
+    photos: string[];
     price: number;
     stock: number;
     category: string;
@@ -30,7 +30,7 @@ export type shippingInfo={
 
     export type cartItem={
         productId:string;
-        photo:string;
+        photos:string[];
         name:string;
         price:number;
         quantity: number;

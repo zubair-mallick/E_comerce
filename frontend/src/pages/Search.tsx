@@ -177,7 +177,7 @@ const dispatch = useDispatch()
                 price={product.price}
                 stock={product.stock}
                 handler={addToCartHandler}
-                photo={product.photo}
+                photos={product.photos}
                 
               />
             ))

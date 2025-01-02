@@ -18,4 +18,5 @@ const storage = new CloudinaryStorage({
   } as Record<string, unknown>  // Cast 'params' to accept extra fields
 });
 
-export const singleUpload = multer({ storage }).single('photo');
+export const multiUpload = multer({ storage }).array('photos', 5); // 'photos' is the field name, allowing up to 5 files
+

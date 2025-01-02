@@ -5,55 +5,39 @@ import { useNavigate } from "react-router-dom";
 import { useNewProductMutation } from "../../../redux/api/productAPI";
 import { UserReducerInitialState } from "../../../types/reducer-types";
 import toast from "react-hot-toast";
-
+import { useFileHandler } from "6pp";
 
 const NewProduct = () => {
-
   interface ApiError {
     data: {
       message: string;
     };
   }
- 
-  const {user}= useSelector((state:{userReducer:UserReducerInitialState})=>state.userReducer)
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const { user } = useSelector(
+    (state: { userReducer: UserReducerInitialState }) => state.userReducer
+  );
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // New state for form submission
 
   const [name, setName] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [price, setPrice] = useState<number>(1000);
   const [stock, setStock] = useState<number>(1);
   const [description, setDescription] = useState<string>("");
-  
-  const [photoPrev, setPhotoPrev] = useState<string>("");
-  const [photo, setPhoto] = useState<File | null>(null);
 
   const [newProduct] = useNewProductMutation();
   const navigate = useNavigate();
 
   // Handle image file change
-  const changeImageHandler = (e: ChangeEvent<HTMLInputElement>) => {
-    const file: File | undefined = e.target.files?.[0];
-
-    const reader: FileReader = new FileReader();
-
-    if (file) {
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        if (typeof reader.result === "string") {
-          setPhotoPrev(reader.result);
-          setPhoto(file);
-        }
-      };
-    }
-  };
+  const photos = useFileHandler("multiple", 10, 5);
 
   // Handle form submission
   const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSubmitting(true); // Set isSubmitting to true when form is submitted
     try {
       if (!name || !price || stock < 0 || !category || !description) return;
-      if (!photo) return;
+      if (!photos || !photos.file) return;
 
       const formData = new FormData();
       formData.set("name", name);
@@ -62,27 +46,31 @@ const NewProduct = () => {
       formData.set("stock", stock.toString());
       formData.set("category", category);
 
-      formData.append("photo", photo); // Add photo to form data
+      // Add photos to form data
+      photos.file.forEach((file) => {
+        formData.append("photos", file);
+      });
 
       const res = await newProduct({ id: user?._id!, formData });
-      
-      if("error" in res){
-       throw res.error
-      }
-      else{
+
+      if ("error" in res) {
+        throw res.error;
+      } else {
         toast.success(res.data?.message!);
         navigate(`/admin/product`);
       }
-      
-    } catch (error ) {
-      if ((error as ApiError) && (error as ApiError).data && (error as ApiError).data.message) {
+    } catch (error) {
+      if (
+        (error as ApiError) &&
+        (error as ApiError).data &&
+        (error as ApiError).data.message
+      ) {
         toast.error((error as ApiError).data.message);
       } else {
         toast.error("An unexpected error occurred");
       }
-     
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false); // Set isSubmitting to false once response is received
     }
   };
 
@@ -150,17 +138,31 @@ const NewProduct = () => {
             <div>
               <label>Photo</label>
               <input
+                multiple
                 required
                 type="file"
                 accept="image/*"
-                onChange={changeImageHandler}
+                onChange={photos.changeHandler}
               />
             </div>
+            {photos.error && <p>{photos.error}</p>}
 
-            {photoPrev && <img src={photoPrev} alt="Preview" width={100} />}
+            {photos.preview && (
+              <div className="image-preview-container">
+                {photos.preview.map((img, index) => (
+                  <div className="image-preview" key={index}>
+                    <img src={img} alt="Preview" />
+                  </div>
+                ))}
+              </div>
+            )}
 
-            <button disabled={isLoading} type="submit">
-              {isLoading ? "Creating..." : "Create"}
+            <button
+              disabled={isSubmitting} // Disable button when form is submitting
+              type="submit"
+              className={isSubmitting ? "button-disabled" : ""}
+            >
+              {isSubmitting ? "Creating..." : "Create"}
             </button>
           </form>
         </article>

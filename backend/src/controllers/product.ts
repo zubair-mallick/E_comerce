@@ -8,6 +8,8 @@ import { NewProductRequestBody, SearchRequestQuery } from "../types/types.js";
 import { invalidateCache } from "../utils/features.js";
 import ErrorHandler from "../utils/utitlity-class.js";
 
+import { faker } from "@faker-js/faker";
+
 export const getlatestProducts = TryCatch(
   async (req: Request<{}, {}, NewProductRequestBody>, res, next) => {
     let products = [];
@@ -83,12 +85,12 @@ export const getSingleProduct = TryCatch(async (req, res, next) => {
 export const newProduct = TryCatch(
   async (req: Request<{}, {}, NewProductRequestBody>, res, next) => {
     const { name, price, stock, category } = req.body;
-    const photo = req.file;
+    const photos = req.files as Express.Multer.File[]; // Cast files array
 
-    if (!photo) {
+    if (!photos || photos.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Photo is required",
+        message: "At least one photo is required",
       });
     }
 
@@ -98,36 +100,33 @@ export const newProduct = TryCatch(
     if (!stock) missingFields.push("stock");
     if (!category) missingFields.push("category");
 
-    // Check for missing fields and delete image if there are any
     if (missingFields.length > 0) {
-      // Extract public_id from the Cloudinary URL for deletion
-      const publicId = photo.filename;
+      // Delete uploaded images from Cloudinary if fields are missing
+      for (const photo of photos) {
+        const publicId = photo.filename;
+        await cloudinary.uploader.destroy(publicId, (error) => {
+          if (error) console.error("Error deleting image from Cloudinary:", error);
+        });
+      }
 
-      // Delete the uploaded photo from Cloudinary
-      await cloudinary.uploader.destroy(publicId, (error, result) => {
-        if (error) {
-          console.error("Error deleting image from Cloudinary:", error);
-          return next(new ErrorHandler("Image deletion failed", 500));
-        }
-      });
-
-      // Throw the error for missing fields after image deletion
       return next(
         new ErrorHandler(`Missing fields: ${missingFields.join(", ")}`, 405)
       );
     }
 
-    const photoUrl = photo.path; // Cloudinary provides the file URL in 'path'
+    // Collect photo URLs from Cloudinary
+    const photoUrls = photos.map((photo) => photo.path);
+
+    invalidateCache({ product: true });
+
 
     await Product.create({
       name,
       price,
       stock,
       category: category.toLowerCase(),
-      photo: photoUrl,
+      photos: photoUrls, // Store all photo URLs as an array
     });
-
-    // await invalidateCache({product:true});
 
     return res.status(201).json({
       success: true,
@@ -138,9 +137,8 @@ export const newProduct = TryCatch(
 
 export const updateProduct = TryCatch(async (req, res, next) => {
   const { id } = req.params;
-
   const { name, price, stock, category } = req.body;
-  const photo = req.file;
+  const photos = req.files as Express.Multer.File[]; // Cast files array
 
   const product = await Product.findById(id);
 
@@ -148,43 +146,34 @@ export const updateProduct = TryCatch(async (req, res, next) => {
     return next(new ErrorHandler(`No product found`, 404));
   }
 
-  if (photo) {
-    const imageUrl = product.photo;
-    const publicId = extractPublicId(imageUrl);
+  // Delete old photos if new ones are uploaded
+  if (photos && photos.length > 0) {
+    for (const imageUrl of product.photos) {
+      const publicId = extractPublicId(imageUrl);
+      await cloudinary.uploader.destroy(publicId, (error) => {
+        if (error) console.error("Error deleting image from Cloudinary:", error);
+      });
+    }
 
-    cloudinary.uploader.destroy(
-      publicId!,
-      { invalidate: true, resource_type: "image" },
-      function (error, result) {
-        if (result) {
-          console.log("old photo Deleted successfully:", result);
-        } else {
-          console.log("Error:", error);
-        }
-
-        console.log(photo.path);
-
-        product.photo = photo.path;
-      }
-    );
+    // Update photos with new ones
+    product.photos = photos.map((photo) => photo.path);
   }
 
-  if (photo) product.photo = photo.path;
   if (name) product.name = name;
   if (price) product.price = price;
   if (stock) product.stock = stock;
   if (category) product.category = category;
 
-  const newproduct = await product.save();
+  const updatedProduct = await product.save();
+  invalidateCache({ product: true, productId: String(product._id) });
 
-   invalidateCache({ product: true, productId: String(product._id) });
   return res.status(200).json({
     success: true,
-    product,
-    newproduct,
-    message: "product updated successfully",
+    updatedProduct,
+    message: "Product updated successfully",
   });
 });
+
 
 export const deleteProduct = TryCatch(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
@@ -192,33 +181,43 @@ export const deleteProduct = TryCatch(async (req, res, next) => {
   if (!product) {
     return next(new ErrorHandler(`No product found`, 404));
   }
-  console.log(product)
-  const imageUrl = product.photo;
-  const publicId = extractPublicId(imageUrl);
 
-  if (imageUrl && publicId) {
-    cloudinary.uploader.destroy(
-      publicId!,
-      { invalidate: true, resource_type: "image" },
-      function (error, result) {
-        if (result) {
-          console.log("old photo Deleted successfully:", result);
-        } else {
-          console.log("Error:", error);
-        }
+  console.log(product);
+
+  // Iterate over all photos and delete them from Cloudinary
+  const photoUrls = product.photos; // Assuming `photos` is an array of URLs
+  if (photoUrls && photoUrls.length > 0) {
+    for (const imageUrl of photoUrls) {
+      const publicId = extractPublicId(imageUrl); // Extract the public_id from the URL
+      if (publicId) {
+        await cloudinary.uploader.destroy(
+          publicId,
+          { invalidate: true, resource_type: "image" },
+          function (error, result) {
+            if (result) {
+              console.log(`Deleted photo (${publicId}) successfully:`, result);
+            } else {
+              console.error(`Error deleting photo (${publicId}):`, error);
+            }
+          }
+        );
       }
-    );
+    }
   }
 
+  // Delete the product from the database
   await product.deleteOne();
 
-   invalidateCache({ product: true, productId: String(product._id) });
+  // Invalidate cache
+  invalidateCache({ product: true, productId: String(product._id) });
 
   return res.status(200).json({
     success: true,
-    message: "product deleted sucessfully",
+    message: "Product and all associated photos deleted successfully",
   });
 });
+
+
 export const getAllProducts = TryCatch(
   async (req: Request<{}, {}, {}, SearchRequestQuery>, res, next) => {
     const {
@@ -282,3 +281,60 @@ export const getAllProducts = TryCatch(
     });
   }
 );
+
+
+// export async function modifyData() {
+//   try {
+//       // Fetch all products data from the EscuelaJS API
+//       const response = await fetch('https://api.escuelajs.co/api/v1/products');
+        
+//       // Check if the response is OK (status code 200)
+//       if (!response.ok) {
+//           throw new Error(`Failed to fetch products. Status: ${response.status}`);
+//       }
+
+//       const apiProducts = await response.json(); // Parse the JSON response
+
+//       // Fetch all existing products from the MongoDB database
+//       const existingProducts = await Product.find();
+
+//       // Check if the number of API products matches the number of MongoDB products
+//       // if (apiProducts.length !== existingProducts.length) {
+//       //     throw new Error('Number of products from API and MongoDB do not match.');
+//       // }
+
+//       // Loop through both API products and existing MongoDB products
+//       for (let i = 0; i < apiProducts.length; i++) {
+//           const apiProduct = apiProducts[i];
+//           const existingProduct = existingProducts[i];
+
+//           // Map API data to your Product model fields
+//           const updatedProductData = {
+//               name: apiProduct.title,
+//               price: (apiProduct.price*100),
+//               stock: 100,  // Default value, adjust based on your stock management
+//               category: apiProduct.category.name,  // Using category name
+//               photos: apiProduct.images, // Replace existing images with new ones from API
+//               description: apiProduct.description,
+//               createdAt: apiProduct.creationAt,
+//               updatedAt: apiProduct.updatedAt,
+//           };
+
+//           // Update the existing product in the MongoDB database
+//           await Product.findByIdAndUpdate(existingProduct._id, updatedProductData, {
+//               new: true,  // Return the updated document
+//           });
+
+//           console.log(`Product with ID ${existingProduct._id} updated successfully.`);
+//       }
+
+//       console.log('All products updated successfully.');
+//   } catch (err) {
+//       console.error('Error updating products with EscuelaJS data:', err);
+//   }
+// }
+
+
+
+
+

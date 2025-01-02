@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa";
 import { HiMenuAlt4 } from "react-icons/hi";
 import { IoIosPeople } from "react-icons/io";
+import { MdDiscount } from "react-icons/md";
 import {
   RiDashboardFill,
   RiShoppingBag3Fill
@@ -97,6 +98,12 @@ const DivOne = ({ location }: { location: Location }) => (
         url="/admin/transaction"
         text="Transaction"
         Icon={AiFillFileText}
+        location={location}
+      />
+       <Li
+        url="/admin/coupon"
+        text="Coupon"
+        Icon={MdDiscount}
         location={location}
       />
     </ul>

@@ -3,7 +3,7 @@ import { cartItem } from "../types/types";
 
 type productsProp={
     productId:string;
-    photo:string;
+    photos:string[];
     name:string;
     price:number;
     stock:number;
@@ -11,15 +11,15 @@ type productsProp={
 }
 
 
-const product_card = ({productId,price,name,photo,stock,handler}:productsProp) => {
+const product_card = ({productId,price,name,photos,stock,handler}:productsProp) => {
   return (
    <div className="product-card">
-       <img src={photo} alt={name} /> 
+       <img src={photos[0]} alt={name} /> 
        <p>{name}</p>
        <span>{price}</span>
 
        <div>
-          <button onClick={()=>handler({productId,price,name,photo,stock,quantity:1})}>
+          <button onClick={()=>handler({productId,price,name,photos,stock,quantity:1})}>
             <FaPlus/>
           </button>
        </div>
