@@ -1,7 +1,7 @@
 import  express  from "express";
 import { isAdmin } from "../middleware/auth.js";
 import { allOrders, deleteOrder, getSingleOrder, myOrders, newOrder, processOrder } from "../controllers/order.js";
-import {generateOrders} from "../routes/populate.js"
+import {generateOrders} from "./populate.js"
 
 const app= express.Router();
 
