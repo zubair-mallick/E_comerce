@@ -835,6 +835,8 @@ a {
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.216);
   position: relative;
 }
+
+ form > div:nth-child(3) > textarea
 .product-management > article > form {
   display: flex;
   flex-direction: column;
@@ -862,7 +864,7 @@ a {
   left: 0;
   top: -1.5rem;
 }
-.product-management > article > form > div > input {
+.product-management > article > form > div > input   {
   padding: 1rem;
   border: 1px solid rgba(13, 13, 13, 0.196);
   background-color: unset;

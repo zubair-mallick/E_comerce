@@ -1,14 +1,14 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { FaTrash } from "react-icons/fa";
-import AdminSidebar from "../../../components/admin/AdminSidebar";
-import { useSelector } from "react-redux";
-import { UserReducerInitialState } from "../../../types/reducer-types";
-import { useParams, useNavigate } from "react-router-dom";
-import { useProductDetailsQuery, useUpdateProductMutation, useDeleteProductMutation } from "../../../redux/api/productAPI";
 import toast from "react-hot-toast";
+import { FaTrash } from "react-icons/fa";
 import Skeleton from "react-loading-skeleton";
 import 'react-loading-skeleton/dist/skeleton.css';
+import { useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import AdminSidebar from "../../../components/admin/AdminSidebar";
+import { useDeleteProductMutation, useProductDetailsQuery, useUpdateProductMutation } from "../../../redux/api/productAPI";
 import { customError } from "../../../types/api-types";
+import { UserReducerInitialState } from "../../../types/reducer-types";
 
 const Productmanagement = () => {
   const { user } = useSelector(

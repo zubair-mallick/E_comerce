@@ -58,9 +58,13 @@
 .cart-item{
     padding: 2rem;
     @include flex(row,flex-start,center,3rem);
-    >img{
+    >a>img{
         @include square(10rem);
         object-fit: contain;
+
+        &:hover{
+            opacity: 0.8;
+        }
     }
 
 

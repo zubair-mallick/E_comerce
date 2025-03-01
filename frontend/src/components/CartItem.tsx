@@ -9,12 +9,15 @@ type CartItemProps ={
 }
 
 const CartItem = ({cartItem,addToCartHandler,removeFromCartHandler}:CartItemProps ) => {
-  const {productid, photos,name,price,quantity,stock } = cartItem;
+  const {productId, photos,name,price,quantity,stock } = cartItem;
+
+  console.log(productId, photos, name, price, quantity)
   return (
     <div className="cart-item">
-        <img src={photos[0]} alt={name} />
+       <Link to={`/product/${productId}`}><img  src={photos[0]} alt={name} /></Link>
+        
         <article>
-          <Link to={`/product/${productid}`}>{name}</Link>
+          <Link to={`/product/${productId}`}>{name}</Link>
           <span>₹{price}</span>
         </article>
 

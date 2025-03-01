@@ -33,7 +33,7 @@ export const cartReducer = createSlice({
         } else {
           state.cartItems[index].quantity += action.payload.quantity;
         }
-        // toast.success("Quantity increased in cart");
+        toast.success("Quantity increased in cart");
       } else {
         state.cartItems.push(action.payload);
         toast.success("Item added to cart");

@@ -98,6 +98,7 @@ const NewProduct = () => {
                 required
                 placeholder="Description"
                 value={description}
+                className="textarea"
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>

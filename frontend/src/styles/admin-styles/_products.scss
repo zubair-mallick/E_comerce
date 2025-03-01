@@ -150,7 +150,7 @@
           top: -1.5rem;
         }
 
-        > input {
+        > input,textarea {
           @include inputStyle(
             100%,
             1rem,
@@ -170,6 +170,21 @@
         border-radius: 5px;
         font-size: 1.1rem;
         cursor: pointer;
+      }
+
+         > input,
+        > textarea {
+          @include inputStyle(
+            100%,
+            1rem,
+            unset,
+            1px solid rgba(13, 13, 13, 0.196)
+          );
+          border-radius: 5px;
+          max-height: 10rem;
+        }
+
+        
       }
     }
   }
@@ -202,7 +217,7 @@
       }
     }
   }
-}
+  
 
 .transaction-product-card {
   @include flex(row, unset, center, 1rem);

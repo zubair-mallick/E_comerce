@@ -18,18 +18,24 @@ const ProductDetails = () => {
   const [carouselOpen, setCarouselOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  const decrement = () => setQuantity((prev) => prev - 1);
+  const decrement = () => {
+    if (quantity > 0) setQuantity((prev) => prev - 1);
+  };
+
   const increment = () => {
-    if (data?.product?.stock === quantity)
-      return toast.error(`${data?.product?.stock} available only`);
-    setQuantity((prev) => prev + 1);
+    if (data?.product?.stock! > quantity) {
+      setQuantity((prev) => prev + 1);
+   
+    } else {
+      toast.error(`${data?.product?.stock} available only`);
+    }
   };
 
   const addToCartHandler = (cartItem: cartItem) => {
     if (cartItem.stock < 1) return toast.error("Out of Stock");
 
     dispatch(addToCart(cartItem));
-    toast.success("Added to cart");
+    // toast.success("Added to cart");
   };
 
   if (isError) return <Navigate to="/404" />;
@@ -46,14 +52,14 @@ const ProductDetails = () => {
                 showThumbnails
                 showNav={false}
                 onClick={() => setCarouselOpen(true)}
-                images={data?.product?.photos|| []}
+                images={data?.product?.photos || []}
               />
               {carouselOpen && (
                 <MyntraCarousel
                   NextButton={NextButton}
                   PrevButton={PrevButton}
                   setIsOpen={setCarouselOpen}
-                  images={data?.product?.photos|| []}
+                  images={data?.product?.photos || []}
                 />
               )}
             </section>
@@ -63,9 +69,9 @@ const ProductDetails = () => {
               <h3>₹{data?.product?.price}</h3>
               <article>
                 <div>
-                  <button  onClick={decrement}>-</button>
+                  <button disabled={quantity === 0} onClick={decrement}>-</button>
                   <span>{quantity}</span>
-                  <button onClick={increment}>+</button>
+                  <button disabled={quantity === data?.product?.stock} onClick={increment}>+</button>
                 </div>
                 <button
                   onClick={() =>

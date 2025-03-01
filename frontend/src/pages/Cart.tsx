@@ -75,14 +75,17 @@ const Cart = () => {
     <div className="cart">
       <main>
         {cartItems.length > 0 ? (
-          cartItems.map((item, idx) => (
+          cartItems.map((item, idx) => {
+            console.log("🥳",item)
+            return (
+          
             <CartItem
               key={idx}
               cartItem={item}
               removeFromCartHandler={removeFromCartHandler}
               addToCartHandler={addToCartHandler}
             />
-          ))
+          )})
         ) : (
           <h1>No Items Added</h1>
         )}

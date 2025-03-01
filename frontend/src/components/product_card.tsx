@@ -17,7 +17,7 @@ const product_card = ({productId,price,name,photos,stock,handler}:productsProp) 
    <div className="product-card">
        <img src={photos[0]} alt={name} /> 
        <p>{name}</p>
-       <span>{price}</span>
+       <span>{price + " ₹"}</span>
 
        <div>
           <button onClick={()=>handler({productId,price,name,photos,stock,quantity:1})}>
