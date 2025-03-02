@@ -18,13 +18,14 @@ const Productmanagement = () => {
   const navigate = useNavigate();
   const { data, isLoading, error } = useProductDetailsQuery(params.id!);
 
-  const { photos, category, name, price, stock } = data?.product || {
+  const { photos, category, name, price, stock,description  } = data?.product || {
     photos: ["", "", "", ""],
     category: "",
     name: "",
     price: 0,
     stock: 0,
     _id: "",
+    description:""
   };
 
   const [priceUpdate, setPriceUpdate] = useState<number | undefined>(undefined);
@@ -35,6 +36,7 @@ const Productmanagement = () => {
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [preverror, setPrevError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false); // Track if the form is submitting
+  const [descriptionUpdate, setDescriptionUpdate] = useState<string>(description);
 
   // Mutations
   const [updateProduct] = useUpdateProductMutation();
@@ -59,7 +61,7 @@ const Productmanagement = () => {
     if (priceUpdate) formData.set("price", priceUpdate.toString());
     if (stockUpdate !== undefined) formData.set("stock", stockUpdate.toString());
     if (categoryUpdate) formData.set("category", categoryUpdate);
-
+    if (descriptionUpdate) formData.set("description", descriptionUpdate);
     // Add selected photo files to FormData
     photoFiles.forEach((file) => {
       formData.append("photos", file);
@@ -110,6 +112,7 @@ const Productmanagement = () => {
       setStockUpdate(data.product.stock);
       setPhotosUpdate(data.product.photos);
       setCategoryUpdate(data.product.category);
+      setDescriptionUpdate(data.product.description);
     }
 
     if (error) {
@@ -175,6 +178,15 @@ const Productmanagement = () => {
                     placeholder={name || "Name"}
                     value={nameUpdate}
                     onChange={(e) => setNameUpdate(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label>Description</label>
+                  <textarea
+                    required
+                    placeholder="Description"
+                    value={descriptionUpdate}
+                    onChange={(e) => setDescriptionUpdate(e.target.value)}
                   />
                 </div>
                 <div>

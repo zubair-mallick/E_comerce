@@ -67,6 +67,9 @@ const ProductDetails = () => {
               <code>{data?.product?.category}</code>
               <h1>{data?.product?.name}</h1>
               <h3>₹{data?.product?.price}</h3>
+              {/* <h3>₹{data?.product?.ratings}</h3> */}
+
+              <p>{data?.product?.description}</p>
               <article>
                 <div>
                   <button disabled={quantity === 0} onClick={decrement}>-</button>
@@ -89,7 +92,7 @@ const ProductDetails = () => {
                 </button>
               </article>
 
-              {/* <p>{data?.product?.description}</p> */}
+             
             </section>
           </main>
         </>

@@ -84,7 +84,7 @@ export const getSingleProduct = TryCatch(async (req, res, next) => {
 
 export const newProduct = TryCatch(
   async (req: Request<{}, {}, NewProductRequestBody>, res, next) => {
-    const { name, price, stock, category } = req.body;
+    const { name, price, stock, category,description } = req.body;
     const photos = req.files as Express.Multer.File[]; // Cast files array
 
     if (!photos || photos.length === 0) {
@@ -99,7 +99,7 @@ export const newProduct = TryCatch(
     if (!price) missingFields.push("price");
     if (!stock) missingFields.push("stock");
     if (!category) missingFields.push("category");
-
+    if (!description) missingFields.push("description");
     if (missingFields.length > 0) {
       // Delete uploaded images from Cloudinary if fields are missing
       for (const photo of photos) {
@@ -125,6 +125,7 @@ export const newProduct = TryCatch(
       price,
       stock,
       category: category.toLowerCase(),
+      description,
       photos: photoUrls, // Store all photo URLs as an array
     });
 
@@ -137,7 +138,7 @@ export const newProduct = TryCatch(
 
 export const updateProduct = TryCatch(async (req, res, next) => {
   const { id } = req.params;
-  const { name, price, stock, category } = req.body;
+  const { name, price, stock, category,description } = req.body;
   const photos = req.files as Express.Multer.File[]; // Cast files array
 
   const product = await Product.findById(id);
@@ -163,6 +164,7 @@ export const updateProduct = TryCatch(async (req, res, next) => {
   if (price) product.price = price;
   if (stock) product.stock = stock;
   if (category) product.category = category;
+  if (description) product.description = description;
 
   const updatedProduct = await product.save();
   invalidateCache({ product: true, productId: String(product._id) });
