@@ -9,6 +9,7 @@ import { useProductDetailsQuery } from "../redux/api/productAPI";
 import { addToCart } from "../redux/reducer/cartReducer";
 import { RootState } from "../redux/store";
 import { cartItem } from "../types/types";
+import RatingsComponent from "../components/Rating";
 
 const ProductDetails = () => {
   const params = useParams();
@@ -66,16 +67,19 @@ const ProductDetails = () => {
             <section>
               <code>{data?.product?.category}</code>
               <h1>{data?.product?.name}</h1>
+             <div>
+             <RatingsComponent value={data?.product?.rating || 5} />
+             </div>
               <h3>₹{data?.product?.price}</h3>
               {/* <h3>₹{data?.product?.ratings}</h3> */}
-
-              <p>{data?.product?.description}</p>
               <article>
                 <div>
                   <button disabled={quantity === 0} onClick={decrement}>-</button>
                   <span>{quantity}</span>
                   <button disabled={quantity === data?.product?.stock} onClick={increment}>+</button>
+                
                 </div>
+           {quantity === data?.product?.stock &&  (   <p className={"red"} >{ "stock limit reached" }</p>)}
                 <button
                   onClick={() =>
                     addToCartHandler({
@@ -91,9 +95,11 @@ const ProductDetails = () => {
                   Add To Cart
                 </button>
               </article>
-
+         
+              <p>{data?.product?.description}</p>
              
             </section>
+            
           </main>
         </>
       )}

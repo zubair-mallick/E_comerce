@@ -45,7 +45,7 @@ const TransactionManagement = () => {
 
   const { isLoading, data, isError, error } = useOrderDetailsQuery(params.id!);
   const {shippingInfo:{address,city,state,country,pincode},orderItems,user:{name},status,tax,subtotal,total,discount,shippingCharges} = data?.order || defaultOrderItems
-
+console.log(data?.order)
   const [order, setOrder] = useState({
     name: "Puma Shoes",
    
@@ -106,17 +106,19 @@ const TransactionManagement = () => {
         >
           <h2>Order Items</h2>
 
-          {orderItems.map((i:any) => (
+          {orderItems.map((i:any) => {
+            // console.log(i)
+            return(
             <ProductCard
               key={i._id}
               name={i.name}
-              photo={i.photo}
+              photos={i.photos}
               productId={i.productId}
               _id={i._id}
               quantity={i.quantity}
               price={i.price}
             />
-          ))}
+          )})}
         </section>
 
         <article className="shipping-info-card">
@@ -162,13 +164,13 @@ const TransactionManagement = () => {
 
 const ProductCard = ({
   name,
-  photo,
+  photos,
   price,
   quantity,
   productId,
 }: OrderItem) => (
   <div className="transaction-product-card">
-    <img src={photo} alt={name} />
+    <img src={photos[0]} alt={name} />
     <Link to={`/product/${productId}`}>{name}</Link>
     <span>
       ₹{price} X {quantity} = ₹{price * quantity}

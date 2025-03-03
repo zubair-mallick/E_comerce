@@ -33,7 +33,7 @@ export const myCache = new NodeCache()
 const app = express();
 
 app.use(cors({
-    origin: [process.env.CORS_ORIGIN!],
+    origin: [process.env.CORS_ORIGIN!,"http://192.168.0.103:5173"],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204

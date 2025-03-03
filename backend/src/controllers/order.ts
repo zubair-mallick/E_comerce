@@ -65,29 +65,44 @@ export const allOrders = TryCatch(
 );
 
 
-export const getSingleOrder = TryCatch(
-  async (req, res, next) => {
-    const {id} = req.params
-    const key = `singleorder-${id}`
-    let order
-    
-    if(myCache.has(key)) order = JSON.parse(myCache.get(key)as string)
-      else{
-      
-        order = await Order.findById(id).populate("user","name")
-       
-        if(!order) return next(new ErrorHandler(`No orders found `, 404))
-        
-        myCache.set(key, JSON.stringify(order))
-      }
-      return res.status(200).json({
-        success: true,
-        order,
-        message: "order fetched sucessfully",
-      })
+export const getSingleOrder = TryCatch(async (req, res, next) => {
+  const { id } = req.params;
+  const key = `singleorder-${id}`;
+  let order;
 
+  if (myCache.has(key)) {
+    order = JSON.parse(myCache.get(key) as string);
+  } else {
+    order = await Order.findById(id)
+      .populate("user", "name") // Populate user name
+      .populate({
+        path: "orderItems.productId",
+        select: "photos", // Select only photos
+      });
+
+    if (!order) return next(new ErrorHandler(`No orders found`, 404));
+
+    myCache.set(key, JSON.stringify(order));
   }
-);
+
+  // 🔹 Transform `orderItems` to move `photos` out of `productId`
+  const formattedOrder = {
+    ...order.toObject(),
+    orderItems: order.orderItems.map((item:any) => ({
+      _id: item._id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      photos: item.productId?.photos || [], // Move photos directly under orderItem
+    })),
+  };
+
+  return res.status(200).json({
+    success: true,
+    order: formattedOrder,
+    message: "Order fetched successfully",
+  });
+});
 
 
 export const newOrder = TryCatch(

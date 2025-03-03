@@ -1,4 +1,4 @@
-import { cartItem, Order, Product, shippingInfo, User, Bar,Pie,Line,Stats } from "./types";
+import { cartItem, Order, Product, shippingInfo, User, Bar,Pie,Line,Stats, CouponType } from "./types";
 
 export type customError={
     status:number;
@@ -39,10 +39,7 @@ export type SearchProductsResponse= AllProductsResponse & {
     isLastPage: boolean,
     
 }
-export type DeleteUserRequest = {
-    userId: string;
-    adminUserId: string;
-  };
+
   
 export type SearchProductsArguments=  {
    
@@ -55,10 +52,6 @@ export type SearchProductsArguments=  {
 
 }
 
-export  type NewProductRequest ={
-    id:string,
-    formData:FormData
-}
 
 export type productDetailResponse = {
     success:boolean;
@@ -127,4 +120,48 @@ export type BarResponse = {
 export type LineResponse = {
   success: boolean;
   charts: Line;
+};
+
+export type NewReviewRequest = {
+  rating: number;
+  comment: string;
+  userId?: string;
+  productId: string;
+};
+
+export type DeleteReviewRequest = {
+  userId?: string;
+  reviewId: string;
+};
+
+export type NewProductRequest = {
+  id: string;
+  formData: FormData;
+};
+
+export type UpdateProductRequest = {
+  userId: string;
+  productId: string;
+  formData: FormData;
+};
+export type DeleteProductRequest = {
+  userId: string;
+  productId: string;
+};
+
+
+
+export type DeleteUserRequest = {
+  userId: string;
+  adminUserId: string;
+};
+
+export type AllDiscountResponse = {
+  success: boolean;
+  coupons: CouponType[];
+};
+
+export type SingleDiscountResponse = {
+  success: boolean;
+  coupon: CouponType;
 };

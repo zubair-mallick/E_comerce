@@ -1,7 +1,7 @@
 export type User={
     name:string,
     email:string;
-    photos:string[];
+    photo:string;
     gender:string;
     role:string;
     dob:string;
@@ -18,6 +18,7 @@ export type Product={
     category: string;
     createdAt?: string;
     updatedAt?: string;
+    rating?: number;
     __v?: number;
 }
 
@@ -38,7 +39,7 @@ export type shippingInfo={
         stock:number;
     }
 
-    export type OrderItem = Omit<cartItem, "stock"> & { _id: string };
+    export type OrderItem = Omit<cartItem, "stock" > & { _id: string };
 
     export type Order = {
         orderItems: OrderItem[];
@@ -134,4 +135,8 @@ type OrderFullfillment = {
     discount: number[];
     revenue: number[];
   };
-  
+  export type CouponType = {
+    code: string;
+    amount: number;
+    _id: string;
+  };

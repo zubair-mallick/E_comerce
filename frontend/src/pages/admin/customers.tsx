@@ -73,7 +73,11 @@ const Customers = () => {
   useEffect(() => {
     if (data)
       setRows(
-        data.users.map((i) => ({
+        data.users.map((i) => {
+          
+          console.log(i.photo)
+          return ({
+          
           avatar: (
             <img
               style={{
@@ -92,7 +96,7 @@ const Customers = () => {
               <FaTrash />
             </button>
           ),
-        }))
+        })})
       );
   }, [data]);
 

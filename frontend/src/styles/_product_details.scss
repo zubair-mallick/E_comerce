@@ -15,10 +15,10 @@
         &:last-of-type {
           width: 60%;
           min-height: 80vh;
-          padding: 4rem;
+          padding: 0rem 4rem;
           h1 {
-            font-size: 3.5rem;
-            margin: 1rem 0;
+            font-size: 2rem;
+            margin: .6rem 0;
           }
           code {
             font-size: 1.2rem;
@@ -33,7 +33,7 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 1rem;
-            margin: 2rem 0;
+            margin: 1rem 0;
             > div {
               width: 9rem;
               @include flex(row, space-between);
@@ -69,8 +69,8 @@
           }
   
           h3 {
-            font-size: 2rem;
-            margin: 1rem 0;
+            font-size: 1.6rem;
+            margin: 0rem 0;
             color: black;
           }
           p {
@@ -107,7 +107,7 @@
           height: 3rem;
           display: grid;
           place-items: center;
-          font-size: 1.5rem;
+          font-size: 1.2rem;
         }
       }
     }
