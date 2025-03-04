@@ -1,9 +1,9 @@
 import { FaTrash } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import { responseToast } from "../../../utils/features.ts";
+import { responseToast, transformImage } from "../../../utils/features.ts";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { Skeleton } from "../../../components/Loader";
@@ -45,18 +45,8 @@ const TransactionManagement = () => {
 
   const { isLoading, data, isError, error } = useOrderDetailsQuery(params.id!);
   const {shippingInfo:{address,city,state,country,pincode},orderItems,user:{name},status,tax,subtotal,total,discount,shippingCharges} = data?.order || defaultOrderItems
-console.log(data?.order)
-  const [order, setOrder] = useState({
-    name: "Puma Shoes",
-   
-    status: "Processing",
-    subtotal: 4000,
-    discount: 1200,
-    shippingCharges: 0,
-    tax: 200,
-    total: 4000 + 200 + 0 - 1200,
-    orderItems,
-  });
+// console.log(data?.order)
+ 
 
 
  const [updateOrder] = useUpdateOrderMutation()
@@ -170,7 +160,7 @@ const ProductCard = ({
   productId,
 }: OrderItem) => (
   <div className="transaction-product-card">
-    <img src={photos[0]} alt={name} />
+    <img src={transformImage(photos[0])} alt={name} />
     <Link to={`/product/${productId}`}>{name}</Link>
     <span>
       ₹{price} X {quantity} = ₹{price * quantity}

@@ -165,3 +165,5 @@ export type SingleDiscountResponse = {
   success: boolean;
   coupon: CouponType;
 };
+
+

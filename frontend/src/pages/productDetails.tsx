@@ -68,10 +68,17 @@ const ProductDetails = () => {
               <code>{data?.product?.category}</code>
               <h1>{data?.product?.name}</h1>
              <div>
-             <RatingsComponent value={data?.product?.rating || 5} />
+              
+              
+             <em
+                style={{ display: "flex", gap: "1rem", alignItems: "center" }}
+              >
+                <RatingsComponent value={data?.product?.ratings || 5} />(
+                {data?.product?.numOfReviews} reviews)
+              </em>
              </div>
               <h3>₹{data?.product?.price}</h3>
-              {/* <h3>₹{data?.product?.ratings}</h3> */}
+              {/* <h3>₹{data?.product?.rating}</h3> */}
               <article>
                 <div>
                   <button disabled={quantity === 0} onClick={decrement}>-</button>

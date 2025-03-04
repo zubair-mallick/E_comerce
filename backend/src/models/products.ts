@@ -30,7 +30,17 @@ const schema = new mongoose.Schema(
       required: [true, "Please enter Description"],
       maxlength: [500, "Description should not exceed 500 characters"],
     
-    }
+    },
+
+    ratings: {
+      type: Number,
+      default: 0,
+    },
+
+    numOfReviews: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

@@ -18,7 +18,8 @@ export type Product={
     category: string;
     createdAt?: string;
     updatedAt?: string;
-    rating?: number;
+    ratings?: number;
+    numOfReviews?: number;
     __v?: number;
 }
 

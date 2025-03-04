@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { InvalidateCacheProp, OrderItem } from "../types/types.js";
 import { myCache } from "../app.js";
 import { Product } from "../models/products.js";
+import { Review } from "../models/review.js";
 export const connectdb = () => {
   mongoose
     .connect(process.env.MONGODB_URI!, {
@@ -10,6 +11,27 @@ export const connectdb = () => {
     .then((c) => console.log(`db sonnected to ${c.connection.host}`))
     .catch((err) => console.log(`db conection error :${err}`));
 };
+
+
+export const findAverageRatings = async (
+  productId: mongoose.Types.ObjectId
+) => {
+  let totalRating = 0;
+
+  const reviews = await Review.find({ product: productId });
+  reviews.forEach((review) => {
+    totalRating += review.rating;
+  });
+
+  const averateRating = Math.floor(totalRating / reviews.length) || 0;
+
+  return {
+    numOfReviews: reviews.length,
+    ratings: averateRating,
+  };
+};
+
+
 
 export const invalidateCache =  ({
             product,

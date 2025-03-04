@@ -1,6 +1,6 @@
 import  express  from "express";
 import { isAdmin } from "../middleware/auth.js";
-import { deleteProduct, getAdminProducts, getAllCategories, getAllProducts, getlatestProducts, getSingleProduct, newProduct, updateProduct } from "../controllers/product.js";
+import { allReviewsOfProduct, deleteProduct, deleteReview, getAdminProducts, getAllCategories, getAllProducts, getlatestProducts, getSingleProduct, newProduct, newReview, updateProduct } from "../controllers/product.js";
 import { multiUpload } from "../middleware/multer.js";
 
 
@@ -17,6 +17,9 @@ app.route(`/:id`).get(getSingleProduct).put(isAdmin,multiUpload,updateProduct).d
 
 
 
+app.get("/reviews/:id", allReviewsOfProduct);
+app.post("/review/new/:id", newReview);
+app.delete("/review/:id", deleteReview);
 
 
 
