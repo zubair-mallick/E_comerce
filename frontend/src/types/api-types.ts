@@ -1,4 +1,4 @@
-import { cartItem, Order, Product, shippingInfo, User, Bar,Pie,Line,Stats, CouponType } from "./types";
+import { cartItem, Order, Product, shippingInfo, User, Bar,Pie,Line,Stats, CouponType, Review } from "./types";
 
 export type customError={
     status:number;
@@ -167,3 +167,7 @@ export type SingleDiscountResponse = {
 };
 
 
+export type AllReviewsResponse = {
+  success: boolean;
+  reviews: Review[];
+};

@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-import { AllProductsResponse, categoriesResponse, deleteProductRequest, messageResponse, NewProductRequest, productDetailResponse, SearchProductsArguments, SearchProductsResponse, updateProductRequest } from "../../types/api-types"
+import { AllProductsResponse, AllReviewsResponse, categoriesResponse, deleteProductRequest, DeleteReviewRequest, MessageResponse, messageResponse, NewProductRequest, NewReviewRequest, productDetailResponse, SearchProductsArguments, SearchProductsResponse, updateProductRequest } from "../../types/api-types"
 
 export const server =import.meta.env.VITE_SERVER || "http://localhost:3000/"
 
@@ -68,6 +68,32 @@ export const productApi = createApi({
         }), invalidatesTags:["product"] }),
 
 
+
+        allReviewsOfProducts: builder.query<AllReviewsResponse, string>({
+            query: (productId) => `reviews/${productId}`,
+            providesTags: ["product"],
+          }),
+      
+          newReview: builder.mutation<MessageResponse, NewReviewRequest>({
+            query: ({ comment, rating, productId, userId }) => ({
+              url: `review/new/${productId}?id=${userId}`,
+              method: "POST",
+              body: { comment, rating },
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }),
+            invalidatesTags: ["product"],
+          }),
+      
+          deleteReview: builder.mutation<MessageResponse, DeleteReviewRequest>({
+            query: ({ reviewId, userId }) => ({
+              url: `/review/${reviewId}?id=${userId}`,
+              method: "DELETE",
+            }),
+            invalidatesTags: ["product"],
+          }),
+
         
 
 
@@ -75,4 +101,8 @@ export const productApi = createApi({
     })
 })
 
-export const { useLatestProductsQuery,useAllProductsQuery,useCategoriesQuery ,useSearchProductsQuery,useNewProductMutation ,useProductDetailsQuery,useDeleteProductMutation,useUpdateProductMutation} = productApi
+export const { useLatestProductsQuery,useAllProductsQuery,useCategoriesQuery ,useSearchProductsQuery,useNewProductMutation ,useProductDetailsQuery,useDeleteProductMutation,useUpdateProductMutation,
+    useAllReviewsOfProductsQuery, useNewReviewMutation,
+    useDeleteReviewMutation
+
+} = productApi

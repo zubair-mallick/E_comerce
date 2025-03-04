@@ -294,17 +294,15 @@ export const allReviewsOfProduct = TryCatch(async (req, res, next) => {
   let reviews;
   const key = `reviews-${req.params.id}`;
 
-  if (myCache.has(key)) {
-    reviews = JSON.parse(myCache.get(key) as string);
-  } else {
+
     reviews = await Review.find({
       product: req.params.id,
     })
       .populate("user", "name photo")
       .sort({ updatedAt: -1 });
 
-    myCache.set(key, JSON.stringify(reviews));
-  }
+  
+  
 
   return res.status(200).json({
     success: true,
