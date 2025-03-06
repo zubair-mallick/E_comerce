@@ -41,6 +41,7 @@ export interface NewUserRequestBody {
     userId?:string;
     orderId?:string;
     productId?:string | string[];
+    user?:boolean;
   }
 
   export interface OrderItem {

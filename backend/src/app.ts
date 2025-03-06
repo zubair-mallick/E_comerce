@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { connectdb } from './utils/features.js';
+import { connectdb, connectRedis } from './utils/features.js';
 import { errorMiddleware } from './middleware/error.js';
 import NodeCache from 'node-cache'
 import {config} from "dotenv"
@@ -21,11 +21,12 @@ config({
 dotenv.config(); // Load environment variables
 const port = process.env.PORT || 3000;
 const stripeKey = process.env.STRIPE_KEY || "";
-
+const redisURI = process.env.REDIS_URI || "";
 
 
 
 connectdb()
+export const redis =connectRedis(redisURI)
 
 export const stripe = new Stripe(stripeKey)
 

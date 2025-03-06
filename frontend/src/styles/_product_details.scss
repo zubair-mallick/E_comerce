@@ -176,13 +176,18 @@
       }
     }
   }
-  
+  .review-container{
+    // display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+
+  }
   .review {
     position: relative;
-    width: 45rem;
+    // min-width: 25rem;
     flex: none;
     background-color: rgb(244, 244, 244);
-    padding: 2rem;
+    padding: 2rem ;
     border-radius: 1rem;
     margin: 1rem 0;
     display: flex;

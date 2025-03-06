@@ -1,77 +1,82 @@
 import { Request } from "express";
-import { myCache } from "../app.js";
+import { redis } from "../app.js";  // Ensure Redis is properly imported
 import { TryCatch } from "../middleware/error.js";
 import { Order } from "../models/order.js";
 import { NewOrderRequestBody } from "../types/types.js";
 import { invalidateCache, reduceStock } from "../utils/features.js";
 import ErrorHandler from "../utils/utitlity-class.js";
 
-
-
 export const myOrders = TryCatch(
   async (req, res, next) => {
-   const {id:user} = req.query
-    if(!user){
-      return next(new ErrorHandler("Login to access your orders",401))
- 
+    const { id: user } = req.query;
+
+    if (!user) {
+      return next(new ErrorHandler("Login to access your orders", 401));
     }
 
-    let orders=[]
-    if(myCache.has(`my-orders-${user}`)) orders = JSON.parse(myCache.get(`my-orders-${user}`)as string)
-    else{
-      orders = await Order.find({user})
-      console.log({orders,user})
-      if(!orders) return next(new ErrorHandler(`No orders found for user: ${user}`, 404))
-      
-      myCache.set(`my-orders-${user}`, JSON.stringify(orders))
-      if(!orders.length || !orders[0]?.orderItems?.length ){
-        return next(new ErrorHandler(`No orders found for user`, 404))
+    let orders = [];
+
+    // Fetch from Redis cache
+    const cachedOrders = await redis.get(`my-orders-${user}`);
+    if (cachedOrders) {
+      orders = JSON.parse(cachedOrders);
+    } else {
+      orders = await Order.find({ user });
+
+      if (!orders.length || !orders[0]?.orderItems?.length) {
+        return next(new ErrorHandler(`No orders found for user`, 404));
       }
 
+      // Store in Redis for 1 hour
+      await redis.set(`my-orders-${user}`, JSON.stringify(orders), "EX", 3600);
     }
+
     return res.status(200).json({
       success: true,
       orders,
       no_of_orders: orders[0]?.orderItems?.length,
-      message: "all orders fetched of user sucessfully",
+      message: "All orders fetched for user successfully",
     });
-
   }
 );
 
-
 export const allOrders = TryCatch(
-
   async (req, res, next) => {
-   const {id:user} = req.query
-  
-    let orders=[]
+    let orders = [];
 
-    if(myCache.has(`all-orders`)) orders = JSON.parse(myCache.get(`all-orders`)as string)
-    else{
-      orders = await Order.find().populate("user","name")
-      if(!orders) return next(new ErrorHandler(`No orders found for user: ${user}`, 404))
-      
-      myCache.set(`all-orders`, JSON.stringify(orders))
+    // Fetch from Redis cache
+    const cachedOrders = await redis.get(`all-orders`);
+    if (cachedOrders) {
+      orders = JSON.parse(cachedOrders);
+    } else {
+      orders = await Order.find().populate("user", "name");
+
+      if (!orders.length) {
+        return next(new ErrorHandler(`No orders found`, 404));
+      }
+
+      // Store in Redis for 1 hour
+      await redis.set(`all-orders`, JSON.stringify(orders));
     }
+
     return res.status(200).json({
       success: true,
       orders,
-
-      message: "all orders fetched of user sucessfully",
+      message: "All orders fetched successfully",
     });
-
   }
 );
-
 
 export const getSingleOrder = TryCatch(async (req, res, next) => {
   const { id } = req.params;
   const key = `singleorder-${id}`;
-  let order;
+  let formattedOrder;
+  let order
+  // Fetch from Redis cache
+  formattedOrder = await redis.get(key)
 
-  if (myCache.has(key)) {
-    order = JSON.parse(myCache.get(key) as string);
+  if (formattedOrder) {
+    formattedOrder = JSON.parse(formattedOrder);
   } else {
     order = await Order.findById(id)
       .populate("user", "name") // Populate user name
@@ -82,11 +87,10 @@ export const getSingleOrder = TryCatch(async (req, res, next) => {
 
     if (!order) return next(new ErrorHandler(`No orders found`, 404));
 
-    myCache.set(key, JSON.stringify(order));
-  }
+   
 
   // 🔹 Transform `orderItems` to move `photos` out of `productId`
-  const formattedOrder = {
+   formattedOrder = {
     ...order.toObject(),
     orderItems: order.orderItems.map((item:any) => ({
       _id: item._id,
@@ -96,6 +100,8 @@ export const getSingleOrder = TryCatch(async (req, res, next) => {
       photos: item.productId?.photos || [], // Move photos directly under orderItem
     })),
   };
+  redis.set(key, JSON.stringify(formattedOrder));
+}
 
   return res.status(200).json({
     success: true,
@@ -104,10 +110,8 @@ export const getSingleOrder = TryCatch(async (req, res, next) => {
   });
 });
 
-
 export const newOrder = TryCatch(
   async (req: Request<{}, {}, NewOrderRequestBody>, res, next) => {
-    
     const {
       shippingInfo,
       orderItems,
@@ -118,9 +122,10 @@ export const newOrder = TryCatch(
       discount,
       total,
     } = req.body;
+
     const missingFields = [];
 
-    // Check each field and add to missingFields array if undefined or null
+    // Validate required fields
     if (!shippingInfo) missingFields.push("shippingInfo");
     if (!orderItems) missingFields.push("orderItems");
     if (!user) missingFields.push("user");
@@ -130,7 +135,6 @@ export const newOrder = TryCatch(
     if (discount === undefined) missingFields.push("discount");
     if (total === undefined) missingFields.push("total");
 
-    // If any missing fields, throw error
     if (missingFields.length > 0) {
       return next(
         new ErrorHandler(
@@ -140,7 +144,7 @@ export const newOrder = TryCatch(
       );
     }
 
-    const order=await Order.create({
+    const order = await Order.create({
       shippingInfo,
       orderItems,
       user,
@@ -150,9 +154,16 @@ export const newOrder = TryCatch(
       discount,
       total,
     });
+
     await reduceStock(orderItems);
 
-    invalidateCache({ product: true, order: true, admin: true ,userId:user ,productId:order.orderItems.map(i=>String(i.productId))});
+    invalidateCache({
+      product: true,
+      order: true,
+      admin: true,
+      userId: user,
+      productId: order.orderItems.map((i) => String(i.productId)),
+    });
 
     return res.status(201).json({
       success: true,
@@ -161,80 +172,66 @@ export const newOrder = TryCatch(
   }
 );
 
-export const processOrder = TryCatch(
-  async (req, res, next) => {
+export const processOrder = TryCatch(async (req, res, next) => {
+  let status = req.query.status as string;
+  const { id } = req.params;
 
-   let  status = req.query.status as string;
-    const {id} = req.params;
-    
-    const order = await Order.findById(id)
+  const order = await Order.findById(id);
+  if (!order) return next(new ErrorHandler("Order not found", 404));
 
-      if(!order) return next(new ErrorHandler("Order not found",404))
-
-      
-
-      if (status) {
-        console.log("here");
-        
-        if(status!="Processing" && status!="Shipped" && status!= "Delivered" && status!="Cancelled"){
-          return next(new ErrorHandler("Invalid status", 400));  
-        }
-
-        order.status = status as "Processing" | "Shipped" | "Delivered" | "Cancelled";
-       
+  if (status) {
+    if (!["Processing", "Shipped", "Delivered", "Cancelled"].includes(status)) {
+      return next(new ErrorHandler("Invalid status", 400));
     }
-    else{
-
-      status= order.status
-      console.log(status);
-      
-      switch(status) {
-        case "Processing":
-          order.status = "Shipped";
-          break;
-        case "Shipped":
-          order.status = "Delivered";
-          break;
-       
-      
-        default:
-          return next(new ErrorHandler("Invalid status Delivery has reached", 400));
-      }
+    order.status = status as "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  } else {
+    switch (order.status) {
+      case "Processing":
+        order.status = "Shipped";
+        break;
+      case "Shipped":
+        order.status = "Delivered";
+        break;
+      default:
+        return next(new ErrorHandler("Invalid status, delivery has reached", 400));
     }
-
-    await order.save();
-    console.log(order.user);
-    
-
-    invalidateCache({ product: false, order: true, admin: true,userId:order.user,orderId:String(order._id)  });
-
-    return res.status(201).json({
-      success: true,
-      status: order.status,
-      message: `Order status changed to  '${order.status}' successfully`,
-    });
   }
-);
 
-export const deleteOrder = TryCatch(
-  async (req, res, next) => {
+  await order.save();
 
-   
-    const {id} = req.params;
-    
-    let order: any = await Order.findById(id)
+  invalidateCache({
+    product: false,
+    order: true,
+    admin: true,
+    userId: order.user,
+    orderId: String(order._id),
+  });
 
-      if(!order) return next(new ErrorHandler("Order not found",404))
+  return res.status(201).json({
+    success: true,
+    status: order.status,
+    message: `Order status changed to '${order.status}' successfully`,
+  });
+});
 
-         await order.deleteOne();
+export const deleteOrder = TryCatch(async (req, res, next) => {
+  const { id } = req.params;
 
-      
-    invalidateCache({ product: false, order: true, admin: true,userId:order.user,orderId:order._id });
+  const order = await Order.findById(id);
+  if (!order) return next(new ErrorHandler("Order not found", 404));
 
-    return res.status(201).json({
-      success: true,
-      order,
-      message: `Order dleted successfully`,
-    });
-  }
-);
+  await order.deleteOne();
+
+  invalidateCache({
+    product: false,
+    order: true,
+    admin: true,
+    userId: order.user,
+    orderId: order._id,
+  });
+
+  return res.status(201).json({
+    success: true,
+    message: "Order deleted successfully",
+  });
+});

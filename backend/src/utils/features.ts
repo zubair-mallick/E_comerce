@@ -1,8 +1,28 @@
 import mongoose from "mongoose";
 import { InvalidateCacheProp, OrderItem } from "../types/types.js";
-import { myCache } from "../app.js";
+import { myCache, redis } from "../app.js";
 import { Product } from "../models/products.js";
 import { Review } from "../models/review.js";
+import  {Redis}  from "ioredis" ;
+
+
+
+export const connectRedis = (redisURI:string)=>
+{
+const redis = new Redis(redisURI) ;
+
+redis.on("connect",()=>console.log("Redis Connected: "))
+redis.on("error",(e)=>console.log("Redis Have Error: " + e.message))
+
+
+return redis
+
+
+
+
+
+}
+
 export const connectdb = () => {
   mongoose
     .connect(process.env.MONGODB_URI!, {
@@ -33,43 +53,55 @@ export const findAverageRatings = async (
 
 
 
-export const invalidateCache =  ({
-            product,
-            order,
-            admin, 
-            userId,
-            orderId,
-            productId,
-          }: InvalidateCacheProp) => {
-            if (product) {
-                  const productKeys: string[] = [
-                    "latest-product",
-                    "category",
-                    "adminProducts",
-                  ];
-                  if (typeof productId === "string")
-                        productKeys.push(`singleProduct-${productId}`);
-                    
-                  if (Array.isArray(productId)) {
-                       productId!.forEach((productId) => {
-                            productKeys.push(`singleProduct-${productId}`);
-                          });
-                  }
-                  myCache.del(productKeys);
-            }
-            if (order) {
-              const orderKeys: string[] = [
-                "all-orders",
-                `my-orders-${userId}`,
-                `singleorder-${orderId}`,
-              ];
+export const invalidateCache = async ({
+  product,
+  order,
+  admin,
+  userId,
+  orderId,
+  productId,
+  user
+}: InvalidateCacheProp) => {
+  if (product) {
+      const productKeys: string[] = [
+          "latest-product",
+          "category",
+          "adminProducts",
+          "user"
+      ];
+      if (typeof productId === "string") {
+          productKeys.push(`singleProduct-${productId}`);
+      }
+      if (Array.isArray(productId)) {
+          productId.forEach((id) => {
+              productKeys.push(`singleProduct-${id}`);
+          });
+      }
+      await redis.del(productKeys);
+  }
 
-              myCache.del(orderKeys);
-            }
-            if (admin) {
-              myCache.del(["admin-stats","admin-pie-charts","admin-bar-charts", "admin-line-charts"])
-            }
-            myCache.del(["admin-stats","admin-pie-charts","admin-bar-charts", "admin-line-charts"])
+  if (order) {
+      const orderKeys: string[] = [
+          "all-orders",
+          `my-orders-${userId}`,
+          `singleorder-${orderId}`,
+      ];
+      await redis.del(orderKeys);
+  }
+
+  if (admin) {
+      await redis.del([
+          "admin-stats",
+          "admin-pie-charts",
+          "admin-bar-charts",
+          "admin-line-charts"
+      ]);
+  }
+
+  if (user) {
+      // Delete user from Redis with keys `user-{userId}` and `all-users`
+      await redis.del([`user-${userId}`, "all-users"]);
+  }
 };
 
 export const reduceStock = async (orderItems: OrderItem[]) => {

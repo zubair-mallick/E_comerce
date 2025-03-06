@@ -249,6 +249,7 @@ const ReviewCard = ({
   review: Review;
   handleDeleteReview: (reviewId: string) => void;
 }) => (
+  <div className="review-container">
   <div className="review">
     <RatingsComponent value={review.rating} />
     <p>{review.comment}</p>
@@ -261,6 +262,7 @@ const ReviewCard = ({
         <FaTrash />
       </button>
     )}
+  </div>
   </div>
 );
 

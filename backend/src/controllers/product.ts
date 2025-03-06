@@ -1,6 +1,6 @@
 import { extractPublicId } from "cloudinary-build-url";
 import { Request } from "express";
-import { myCache } from "../app.js";
+import { myCache, redis } from "../app.js";
 import { cloudinary } from "../config/cloudinary.js"; // Import Cloudinary
 import { TryCatch } from "../middleware/error.js";
 import { Product } from "../models/products.js";
@@ -13,17 +13,18 @@ import {
 } from "../utils/features.js";
 import ErrorHandler from "../utils/utitlity-class.js";
 
-import { faker } from "@faker-js/faker";
 
 export const getlatestProducts = TryCatch(
   async (req: Request<{}, {}, NewProductRequestBody>, res, next) => {
-    let products = [];
+    let products;
 
-    if (myCache.has("latest-product"))
-      products = JSON.parse(myCache.get("latest-product") as string);
+     products = await redis.get("latest-product")
+
+    if (products)
+      products = JSON.parse(products);
     else {
       products = await Product.find({ stock: { $gt: 0 } }).sort({ createdAt: -1 }).limit(6);
-      myCache.set("latest-product", JSON.stringify(products));
+      await redis.set("latest-product", JSON.stringify(products));
     }
 
    
@@ -37,7 +38,15 @@ export const getlatestProducts = TryCatch(
 
 export const getAllCategories = TryCatch(
   async (req: Request<{}, {}, NewProductRequestBody>, res, next) => {
-    const categories = await Product.distinct("category");
+    let categories
+
+    categories = await redis.get("categories")
+    if (categories)
+      categories = JSON.parse(categories);
+    else
+    { categories = await Product.distinct("category");
+     await  redis.set("categories", JSON.stringify(categories));
+    }
 
     return res.status(200).json({
       success: true,
@@ -50,11 +59,12 @@ export const getAllCategories = TryCatch(
 export const getAdminProducts = TryCatch(
   async (req: Request<{}, {}, NewProductRequestBody>, res, next) => {
     let products;
-    if (myCache.has("adminProducts"))
-      products = JSON.parse(myCache.get("adminProducts") as string);
+    products = await redis.get("adminProducts")
+    if (products)
+      products = JSON.parse(products);
     else {
       products = await Product.find({});
-      myCache.set("adminProducts", JSON.stringify(products));
+      await redis.set("adminProducts", JSON.stringify(products));
     }
 
     return res.status(200).json({
@@ -68,8 +78,9 @@ export const getAdminProducts = TryCatch(
 export const getSingleProduct = TryCatch(async (req, res, next) => {
   const id = req.params.id;
   let product;
-  if (myCache.has(`singleProduct-${id}`))
-    product = JSON.parse(myCache.get(`singleProduct-${id}`) as string);
+  product = await redis.get(`singleProduct-${id}`)
+  if (product)
+    product = JSON.parse(product);
   else {
     product = await Product.findById(id);
 
@@ -77,7 +88,7 @@ export const getSingleProduct = TryCatch(async (req, res, next) => {
       return next(new ErrorHandler(`No product found `, 404));
     }
 
-    myCache.set(`singleProduct-${id}`, JSON.stringify(product));
+    await  redis.set(`singleProduct-${id}`, JSON.stringify(product));
   }
 
   return res.status(200).json({
@@ -225,6 +236,7 @@ export const deleteProduct = TryCatch(async (req, res, next) => {
 });
 
 
+
 export const getAllProducts = TryCatch(
   async (req: Request<{}, {}, {}, SearchRequestQuery>, res, next) => {
     const {
@@ -232,68 +244,91 @@ export const getAllProducts = TryCatch(
       sort,
       category,
       price,
-      minPrice, // Added minPrice to the destructured query
+      minPrice, 
       page: pageFromQuery,
       limit: limitFromQuery,
     } = req.query;
+
     const page = Number(pageFromQuery) || 1;
-    const limit =
-      Number(limitFromQuery) || Number(process.env.PRODUCT_PER_PAGE) || 8;
+    const limit = Number(limitFromQuery) || Number(process.env.PRODUCT_PER_PAGE) || 8;
     const skip = limit * (page - 1);
 
-    // Build the query object
-    const query: any = {};
+    let key = `products-${search}-${sort}-${category}-${price}-${minPrice}-${page}-${limit}`;
 
-    // Search with regex if the search term exists
-    if (search) {
-      query.name = { $regex: search, $options: "i" }; // Case-insensitive search
-    }
-    // Filter by category if it exists
-    if (category) {
-      query.category = category;
-    }
-    // Filter by price range if minPrice and/or maxPrice (price) are provided
-    if (minPrice || price) {
-      query.price = {};
-      if (minPrice) {
-        query.price.$gte = Number(minPrice); // Greater than or equal to minPrice
+    try {
+      // Check Redis cache
+      let cachedata = await redis.get(key);
+      if (cachedata) {
+        const parsedData = JSON.parse(cachedata);
+        return res.status(200).json({
+          success: true,
+          ...parsedData,
+          message: "Products fetched from cache successfully",
+        });
       }
-      if (price) {
-        query.price.$lte = Number(price); // Less than or equal to price (maxPrice)
+
+      // Build the query object
+      const query: any = {};
+
+      if (search) {
+        query.name = { $regex: search, $options: "i" };
       }
+      if (category) {
+        query.category = category;
+      }
+      if (minPrice || price) {
+        query.price = {};
+        if (minPrice) query.price.$gte = Number(minPrice);
+        if (price) query.price.$lte = Number(price);
+      }
+
+      // Fetch products and total count in parallel
+      const [products, allProductsWithFilters] = await Promise.all([
+        Product.find(query)
+          .sort(sort && { price: sort === "asc" ? 1 : -1 })
+          .skip(skip)
+          .limit(limit),
+        Product.find(query).countDocuments(),
+      ]);
+
+      const totalPage = Math.ceil(allProductsWithFilters / limit);
+      if (products.length === 0) {
+        return next(new ErrorHandler(`No products found for the provided criteria`, 404));
+      }
+
+      const responseData = {
+        isFirstPage: page === 1,
+        isLastPage: totalPage === page,
+        totalPage,
+        products,
+      };
+
+      // Store in Redis cache for future requests
+      await redis.setex(key, 60,JSON.stringify(responseData) ); // Cache expires in 1 hour
+
+      return res.status(200).json({
+        success: true,
+        ...responseData,
+        message: "Products based on query fetched successfully",
+      });
+
+    } catch (error) {
+      return next(error);
     }
-
-    const [products, allProductsWithFilters] = await Promise.all([
-      Product.find(query)
-        .sort(sort && { price: sort === "asc" ? 1 : -1 })
-        .skip(skip)
-        .limit(limit),
-
-      Product.find(query),
-    ]);
-    const totalPage = Math.ceil(allProductsWithFilters.length / limit);
-
-    if (page > totalPage) {
-      return next(
-        new ErrorHandler(`No products found for the provided criteria`, 404)
-      );
-    }
-
-    return res.status(200).json({
-      success: true,
-      isFirstPage: page === 1,
-      isLastPage: totalPage === page,
-      products,
-      message: "Products based on query fetched successfully",
-    });
   }
 );
+
 
 //review section is here
 export const allReviewsOfProduct = TryCatch(async (req, res, next) => {
   let reviews;
   const key = `reviews-${req.params.id}`;
 
+  reviews = await redis.get(key)
+  if (reviews) {
+    reviews = JSON.parse(reviews);
+  }
+  else{
 
     reviews = await Review.find({
       product: req.params.id,
@@ -301,7 +336,8 @@ export const allReviewsOfProduct = TryCatch(async (req, res, next) => {
       .populate("user", "name photo")
       .sort({ updatedAt: -1 });
 
-  
+      await redis.setex(key, 60*10, JSON.stringify(reviews) ); // Cache expires in 1 hour
+  }
   
 
   return res.status(200).json({
@@ -350,6 +386,8 @@ export const newReview = TryCatch(async (req, res, next) => {
 
   await product.save();
 
+  await redis.del(`reviews-${req.params.id}`)
+
   await invalidateCache({
     product: true,
     productId: String(product._id),
@@ -393,6 +431,9 @@ export const deleteReview = TryCatch(async (req, res, next) => {
     productId: String(product._id),
     admin: true,
   });
+
+  await redis.del(`reviews-${req.params.id}`)
+
 
   return res.status(200).json({
     success: true,
