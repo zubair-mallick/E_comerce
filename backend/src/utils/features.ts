@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { InvalidateCacheProp, OrderItem } from "../types/types.js";
-import { myCache, redis } from "../app.js";
+import { redis } from "../app.js";
 import { Product } from "../models/products.js";
 import { Review } from "../models/review.js";
 import  {Redis}  from "ioredis" ;

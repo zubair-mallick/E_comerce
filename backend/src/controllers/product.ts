@@ -1,6 +1,6 @@
 import { extractPublicId } from "cloudinary-build-url";
 import { Request } from "express";
-import { myCache, redis } from "../app.js";
+import { redis } from "../app.js";
 import { cloudinary } from "../config/cloudinary.js"; // Import Cloudinary
 import { TryCatch } from "../middleware/error.js";
 import { Product } from "../models/products.js";
@@ -133,7 +133,7 @@ export const newProduct = TryCatch(
     // Collect photo URLs from Cloudinary
     const photoUrls = photos.map((photo) => photo.path);
 
-    invalidateCache({ product: true });
+    await invalidateCache({ product: true });
 
 
     await Product.create({
@@ -183,7 +183,7 @@ export const updateProduct = TryCatch(async (req, res, next) => {
   if (description) product.description = description;
 
   const updatedProduct = await product.save();
-  invalidateCache({ product: true, productId: String(product._id) });
+  await invalidateCache({ product: true, productId: String(product._id) });
 
   return res.status(200).json({
     success: true,
@@ -227,7 +227,7 @@ export const deleteProduct = TryCatch(async (req, res, next) => {
   await product.deleteOne();
 
   // Invalidate cache
-  invalidateCache({ product: true, productId: String(product._id) });
+  await invalidateCache({ product: true, productId: String(product._id) });
 
   return res.status(200).json({
     success: true,

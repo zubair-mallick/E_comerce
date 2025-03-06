@@ -1,4 +1,4 @@
-import { myCache, redis } from "../app.js";
+import {  redis } from "../app.js";
 import { TryCatch } from "../middleware/error.js";
 import { Order } from "../models/order.js";
 import { Product } from "../models/products.js";

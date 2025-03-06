@@ -2,7 +2,6 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { connectdb, connectRedis } from './utils/features.js';
 import { errorMiddleware } from './middleware/error.js';
-import NodeCache from 'node-cache'
 import {config} from "dotenv"
 import morgan from 'morgan'
 import Stripe  from 'stripe';
@@ -30,7 +29,7 @@ export const redis =connectRedis(redisURI)
 
 export const stripe = new Stripe(stripeKey)
 
-export const myCache = new NodeCache()
+
 const app = express();
 
 app.use(cors({

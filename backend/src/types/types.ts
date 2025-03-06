@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { Types } from "mongoose";
 
 export interface NewUserRequestBody {
     name: string;
@@ -39,7 +40,7 @@ export interface NewUserRequestBody {
     order?:boolean;
     admin?:boolean;
     userId?:string;
-    orderId?:string;
+    orderId?:string | Types.ObjectId;
     productId?:string | string[];
     user?:boolean;
   }
