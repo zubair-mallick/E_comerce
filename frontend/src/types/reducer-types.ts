@@ -9,6 +9,7 @@ export interface cartReducerInitialState{
     loading: boolean;
     cartItems: cartItem[];
     subtotal: number;
+    coupon?:string
     tax:number;
     shippingCharges: number;
     discount:number;

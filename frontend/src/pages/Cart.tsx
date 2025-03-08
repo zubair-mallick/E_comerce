@@ -39,6 +39,8 @@ const Cart = () => {
           .then((res) => {
             dispatch(discountApplied(res.data.discount));
             setIsValidCouponCode(true);
+            //store coupon in local storage
+            localStorage.setItem("couponCode", couponCode);
             dispatch(calculatePrice());
           })
           .catch((err) => {

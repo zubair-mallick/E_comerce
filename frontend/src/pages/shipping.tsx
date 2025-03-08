@@ -33,7 +33,7 @@ const Shipping = () => {
   const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    dispatch(saveShippingInfo(shippingInfo));
+    dispatch(saveShippingInfo({...shippingInfo}));
 
     try {
       const { data } = await axios.post(
@@ -44,7 +44,8 @@ const Shipping = () => {
             quantity: item.quantity,
           })),
           shippingInfo,
-          coupon: "",
+          //get coupon from local storage
+           coupon: localStorage.getItem("couponCode")?JSON.parse(localStorage.getItem("couponCode")!):"",
         },
         {
           headers: {
