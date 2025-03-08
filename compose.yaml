@@ -5,3 +5,43 @@ services:
     ports:
       - "6379:6379"  # Redis default port
       - "8001:8001"  # Redis Insight (if needed)
+
+  server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: server
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - REDIS_URI=redis://redis
+
+    depends_on:
+      - redis
+    develop:
+      watch:
+        - path: ./backend/package*.json
+          action: rebuild
+        - path: ./backend
+          target: /app
+          action: sync
+  client:
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile.dev
+    container_name: client
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - server
+    develop:
+      watch:
+        - path: ./frontend/package*.json
+          action: rebuild
+        - path: ./backend
+          target: /app
+          action: sync

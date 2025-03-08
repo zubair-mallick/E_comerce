@@ -1,19 +1,24 @@
 import { useEffect, useState } from "react";
-import ProductCard from "../components/product_card";
+import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton"; // Import a skeleton loading library
 import "react-loading-skeleton/dist/skeleton.css"; // Import skeleton CSS
-import { categoriesResponse, customError } from "../types/api-types";
+import { useDispatch } from "react-redux";
+import { useSearchParams } from "react-router-dom";
+import ProductCard from "../components/product_card";
 import {
   useCategoriesQuery,
   useSearchProductsQuery,
 } from "../redux/api/productAPI";
-import toast from "react-hot-toast";
-import { cartItem } from "../types/types";
-import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/reducer/cartReducer";
+import { customError } from "../types/api-types";
+import { cartItem } from "../types/types";
 
 
 const Search = () => {
+
+  const searchQuery = useSearchParams()[0];
+  console.log(searchQuery)
+  
   const {
     data: categoriesResponse,
     isLoading: isCategoriesLoading,
@@ -25,7 +30,7 @@ const Search = () => {
   const [sort, setSort] = useState("");
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(100000);
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(capitalizeFirstLetter((searchQuery.get("category")) ||""));
   const [page, setPage] = useState(1);
   const [isNextPage, setIsNextPage] = useState<boolean>(false);
   const [isPrevPage, setIsPrevPage] = useState<boolean>(false);
@@ -37,6 +42,10 @@ const dispatch = useDispatch()
     if(cartItem.stock<1) return toast.error("out of Stock");
     dispatch(addToCart(cartItem));
   };
+
+  function capitalizeFirstLetter(val:string) {
+    return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+}
 
   const {
     data: searchData,

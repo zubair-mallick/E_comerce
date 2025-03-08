@@ -1,11 +1,11 @@
-import { ChangeEvent, FormEvent, useState } from "react";
-import AdminSidebar from "../../../components/admin/AdminSidebar";
+import { useFileHandler } from "6pp";
+import { FormEvent, useState } from "react";
+import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { useNewProductMutation } from "../../../redux/api/productAPI";
 import { UserReducerInitialState } from "../../../types/reducer-types";
-import toast from "react-hot-toast";
-import { useFileHandler } from "6pp";
 
 const NewProduct = () => {
   interface ApiError {

@@ -13,6 +13,7 @@ import {
   makeUserNotExist,
 } from "./redux/reducer/userReducer.ts";
 import { UserReducerInitialState } from "./types/reducer-types.ts";
+import Footer from "./components/footer.tsx";
 
 const Login = lazy(() => import("./pages/login.tsx"));
 const Home = lazy(() => import("./pages/Home"));
@@ -153,6 +154,7 @@ const App = () => {
         </Routes>
       </Suspense>
       <Toaster position="bottom-center" />
+      <Footer></Footer>
     </Router>
   );
 };

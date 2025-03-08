@@ -6,8 +6,7 @@ import {
   Column,
   usePagination,
   useSortBy,
-  useTable,
-  TableOptions,
+  useTable
 } from "react-table";
 
 function TableHOC<T extends Object>(
@@ -18,7 +17,7 @@ function TableHOC<T extends Object>(
   showPagination: boolean = false
 ) {
   return function HOC() {
-    const options: TableOptions<T> = {
+    const options: any = {
       columns,
       data,
       initialState: {
@@ -38,7 +37,7 @@ function TableHOC<T extends Object>(
       previousPage,
       canNextPage,
       canPreviousPage,
-    } = useTable(options, useSortBy, usePagination);
+    }:any = useTable(options, useSortBy, usePagination);
 
     return (
       <div className={containerClassname}>
@@ -46,9 +45,9 @@ function TableHOC<T extends Object>(
 
         <table className="table" {...getTableProps()}>
         <thead>
-        {headerGroups.map((headerGroup) => (
-  <tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id || headerGroup.headers.map((col) => col.id).join('-')}>
-    {headerGroup.headers.map((column) => (
+        {headerGroups.map((headerGroup:any) => (
+  <tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id || headerGroup.headers.map((col:any) => col.id).join('-')}>
+    {headerGroup.headers.map((column:any) => (
       <th {...column.getHeaderProps(column.getSortByToggleProps())} key={column.id}>
         {column.render("Header")}
         {column.isSorted && (
@@ -63,12 +62,12 @@ function TableHOC<T extends Object>(
 
 </thead>
 <tbody {...getTableBodyProps()}>
-  {page.map((row, rowIndex) => {
+  {page.map((row:any, rowIndex:any) => {
     prepareRow(row);
 
     return (
       <tr {...row.getRowProps()} key={row.id || rowIndex}>
-  {row.cells.map((cell) => (
+  {row.cells.map((cell:any) => (
     <td {...cell.getCellProps()} key={cell.column.id}>
       {cell.render("Cell")}
     </td>

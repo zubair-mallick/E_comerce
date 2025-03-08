@@ -33,7 +33,8 @@ export const stripe = new Stripe(stripeKey)
 const app = express();
 
 app.use(cors({
-    origin: [process.env.CORS_ORIGIN!,"http://192.168.0.103:5173"],
+
+    origin:JSON.parse(process.env.CORS_ORIGIN!),
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204

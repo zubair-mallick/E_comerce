@@ -100,19 +100,14 @@ const banners = [
   "https://res.cloudinary.com/dj5q966nb/image/upload/v1719253433/ticeufjqvf6napjhdiee.png",
 ];
 const categories = [
+  "clothes",
   "Electronics",
-  "Mobiles",
-  "Laptops",
-  "Books",
-  "Fashion",
-  "Appliances",
   "Furniture",
-  "Home Decor",
-  "Grocery",
-  "Beauty",
-  "Toys",
-  "Fitness",
-];
+  "Miscellaneous",
+  "Shoes",
+  "camera",
+  "laptop"
+]
 
 const services = [
   {
@@ -157,7 +152,7 @@ const Home = () => {
   };
 
   const coverMessage =
-  "Fashion isn't just clothes; it's a vibrant language. Silhouettes and textures speak volumes, a conversation starter with every bold print. It's a way to tell our story, a confidence booster, or a playful exploration. From elegance to rebellion, fashion lets us navigate the world in style.".split(
+  "love it or hate it but never regret it.".split(
     " "
   );
 
@@ -175,7 +170,7 @@ const Home = () => {
             ))}
           </ul>
         </aside>
-        <Slider autoplay autoplayDuration={1500} showNav={false} images={banners} />
+        <Slider autoplay autoplayDuration={2000} showNav={false} images={banners} />
       </div>
 
 
@@ -188,7 +183,7 @@ const Home = () => {
         {isLoading? (
        <div className="skeleton-container">
          {Array.from({ length: 4 }).map((_, index) => (
-           <SkeletonCard length={length} key={index} />
+           <SkeletonCard  key={index} />
          ))}
        </div>
         ) : isError ? (

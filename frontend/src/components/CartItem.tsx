@@ -9,7 +9,7 @@ type CartItemProps ={
 }
 
 const CartItem = ({cartItem,addToCartHandler,removeFromCartHandler}:CartItemProps ) => {
-  const {productId, photos,name,price,quantity,stock } = cartItem;
+  const {productId, photos,name,price,quantity } = cartItem;
 
   console.log(productId, photos, name, price, quantity)
   return (

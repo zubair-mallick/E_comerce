@@ -12,7 +12,7 @@ export default Loading
 
 
 ;
-export const SkeletonCard = ({length}:{length:number}) => {
+export const SkeletonCard = () => {
   return (
    <>
    <ContentLoader 
@@ -20,6 +20,7 @@ export const SkeletonCard = ({length}:{length:number}) => {
   backgroundColor="#d9d9d98f"
   foregroundColor="#ecebeb"
 >
+
   {/* Main card background */}
   <rect x="0%" y="0%" rx="6" ry="6" width="100%" height="50%" fill="#212121" />
 
