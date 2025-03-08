@@ -4,17 +4,16 @@ import toast from "react-hot-toast";
 import { BiArrowBack } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { server } from "../redux/api/productAPI";
 import { saveShippingInfo } from "../redux/reducer/cartReducer";
 import { cartReducerInitialState, UserReducerInitialState } from "../types/reducer-types";
 import { shippingInfo } from "../types/types";
-import { server } from "../redux/api/productAPI";
-
 
 const Shipping = () => {
-  const { cartItems,total } = useSelector(
-    (state: {cartReducer:cartReducerInitialState}) => state.cartReducer
+  const { cartItems } = useSelector(
+    (state: { cartReducer: cartReducerInitialState }) => state.cartReducer
   );
-  const { user } = useSelector((state: {userReducer:UserReducerInitialState}) => state.userReducer);
+  const { user } = useSelector((state: { userReducer: UserReducerInitialState }) => state.userReducer);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -27,9 +26,7 @@ const Shipping = () => {
     pincode: "",
   });
 
-  const changeHandler = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const changeHandler = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setShippingInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -42,7 +39,12 @@ const Shipping = () => {
       const { data } = await axios.post(
         `${server}/api/v1/payment/create?id=${user?._id}`,
         {
-            amount:total
+          items: cartItems.map((item) => ({
+            productId: item._id,
+            quantity: item.quantity,
+          })),
+          shippingInfo,
+          coupon: "",
         },
         {
           headers: {
@@ -55,14 +57,14 @@ const Shipping = () => {
         state: data.clientSecret,
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Something went wrong");
     }
   };
 
   useEffect(() => {
     if (cartItems.length <= 0) return navigate("/cart");
-  }, [cartItems]);
+  }, [cartItems, navigate]);
 
   return (
     <div className="shipping">
@@ -73,51 +75,14 @@ const Shipping = () => {
       <form onSubmit={submitHandler}>
         <h1>Shipping Address</h1>
 
-        <input
-          required
-          type="text"
-          placeholder="Address"
-          name="address"
-          value={shippingInfo.address}
-          onChange={changeHandler}
-        />
-
-        <input
-          required
-          type="text"
-          placeholder="City"
-          name="city"
-          value={shippingInfo.city}
-          onChange={changeHandler}
-        />
-
-        <input
-          required
-          type="text"
-          placeholder="State"
-          name="state"
-          value={shippingInfo.state}
-          onChange={changeHandler}
-        />
-
-        <select
-          name="country"
-          required
-          value={shippingInfo.country}
-          onChange={changeHandler}
-        >
+        <input required type="text" placeholder="Address" name="address" value={shippingInfo.address} onChange={changeHandler} />
+        <input required type="text" placeholder="City" name="city" value={shippingInfo.city} onChange={changeHandler} />
+        <input required type="text" placeholder="State" name="state" value={shippingInfo.state} onChange={changeHandler} />
+        <select name="country" required value={shippingInfo.country} onChange={changeHandler}>
           <option value="">Choose Country</option>
           <option value="india">India</option>
         </select>
-
-        <input
-          required
-          type="text"
-          placeholder="Pin Code"
-          name="pincode"
-          value={shippingInfo.pincode}
-          onChange={changeHandler}
-        />
+        <input required type="text" placeholder="Pin Code" name="pincode" value={shippingInfo.pincode} onChange={changeHandler} />
 
         <button type="submit">Pay Now</button>
       </form>

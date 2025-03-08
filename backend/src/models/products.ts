@@ -27,7 +27,7 @@ const schema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: [true, "Please enter Description"],
+
       maxlength: [500, "Description should not exceed 500 characters"],
     
     },
