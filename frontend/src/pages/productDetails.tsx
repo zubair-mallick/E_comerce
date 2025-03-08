@@ -47,6 +47,9 @@ const ProductDetails = () => {
   };
 
   const addToCartHandler = (cartItem: cartItem) => {
+    if(!user)  {toast.error(`Login Required`);
+      return;
+    }
     if (cartItem.stock < 1) return toast.error("Out of Stock");
 
     dispatch(addToCart(cartItem));
